@@ -75,17 +75,16 @@ def vanilla_solution(x: Vector, y: Vector, A: Matrix, B: Matrix) -> Vector:
     result: Vector = []
     n = len(x)
     # summation via nested for loops
-    Ax = vanilla_matmul(A,x)
+    Ax = vanilla_matmul(A, x)
     A_tx = vanilla_matmul(vanilla_transpose(A), x)
     B_ty = vanilla_matmul(vanilla_transpose(B), y)
     for i in range(n):
-        result.append(Ax[i]+A_tx[i]+B_ty[i])
+        result.append(Ax[i] + A_tx[i] + B_ty[i])
     return result
 
+
 @problem.tag("hw0-A")
-def numpy_solution(
-    x: np.ndarray, y: np.ndarray, A: np.ndarray, B: np.ndarray
-    ) -> np.ndarray:
+def numpy_solution(x: np.ndarray, y: np.ndarray, A: np.ndarray, B: np.ndarray) -> np.ndarray:
     """Calculates gradient of f(x, y) with respect to x using numpy arrays.
     Where $$f(x, y) = x^T A x + y^T B x + c$$
 
@@ -103,7 +102,7 @@ def numpy_solution(
             You will use this link a lot throughout quarter, so it might be a good idea to bookmark it!
     """
     result: np.ndarray = np.zeros(x.shape)
-    result = A@x + A.T@x + B.T@y
+    result = (A@x) + (A.T@x) + (B.T@y)
     return result
 
 

@@ -27,7 +27,7 @@ def plot_settings():
     plt.legend(
         loc="lower right", bbox_to_anchor=(1.1, 0.2), fancybox=True, shadow=True, ncol=1
     )
-    plt.xlim([-3,3])
+    plt.xlim([-3, 3])
     plt.xlabel("Observations")
     plt.ylabel("Probability")
 
