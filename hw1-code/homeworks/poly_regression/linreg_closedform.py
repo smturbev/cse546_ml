@@ -45,6 +45,7 @@ class LinearRegressionClosedForm:
         # analytical solution (X'X + regMatrix)^-1 X' y
         self.theta = np.linalg.pinv(X_.T.dot(X_) + reg_matrix).dot(X_.T).dot(y)
 
+
     def predict(self, X):
         """
         Use the trained model to predict values for each instance in X

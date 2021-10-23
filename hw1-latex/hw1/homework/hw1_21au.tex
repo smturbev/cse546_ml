@@ -44,7 +44,9 @@ Not adhering to these reminders may result in point deductions. \\
     \begin{enumerate}
         \item\points{2} In your own words, describe what bias and variance are? What is bias-variance tradeoff?
         
-        text
+        Bias arises because we use only a subset of the dataset to train the model so the sample will not be able to capture the true behavior of the set. This can be reduced by resampling (for example k-folding).
+        Variance is how much the predicted values differs from some of the data, this can be a subset of the training set or the test set. Variance is reduced as model complexity increases because it is able to predict the set better.
+        The bias-variance tradeoff is exactly that, a trade off between high bias and low variance with more complex models and vice versa. So, you have to find the sweet spot where variance and bias are minimized. This is also related to under- and overfitting the model.
 
         \rule{\textwidth}{0.25pt}
         \newpage
@@ -67,6 +69,8 @@ Not adhering to these reminders may result in point deductions. \\
         \rule{\textwidth}{0.25pt}
         \newpage
         \item \points{1} True or False: The training error of a function on the training set provides an overestimate of the true error of that function.
+
+        text
 
         \rule{\textwidth}{0.25pt}
         \newpage
@@ -118,6 +122,7 @@ Not adhering to these reminders may result in point deductions. \\
         \end{align*}
         Thus,
         $$ \boxed{\lambda =  \text{mean} (x_i, ... , x_n)} $$
+        \rule{\textwidth}{0.25pt}
         \newpage
 
         \item After the first five games,
@@ -129,6 +134,7 @@ Not adhering to these reminders may result in point deductions. \\
             Poi(6|2.6) &= e^{-2.6} \frac{2.6^6}{6!} \\
         \end{align*}
         $$ \boxed { Poi(6|2.6) = 0.0319 } $$
+        \rule{\textwidth}{0.25pt}
         \newpage
 
         \item After the sixth game if Reign scores 8 goals, then
@@ -209,68 +215,47 @@ Not adhering to these reminders may result in point deductions. \\
     \end{wrapfigure}
 
     By not including the $x_0$ column in the matrix \texttt{polyfeatures()}, this allows the \texttt{polyfeatures} function to be more general, so it could be applied to multi-variate data as well. (If it did add the $x_0$ feature, we'd end up with multiple columns of 1's for multivariate data.)\\
-    
+
     Also, notice that the resulting features will be badly scaled if we use them in raw form.  For example, with a polynomial of degree $d = 8$ and $x = 20$, the basis expansion yields $x^1 = 20$ while $x^8 = 2.56 \times 10^{10}$ -- an
     absolutely huge difference in range.  Consequently, we will need to standardize the data before solving linear regression.  Standardize the data in \texttt{fit()} after you perform the polynomial feature expansion.  You'll need to apply the same standardization transformation in \texttt{predict()} before you apply it to new data.\\
-    
+
     Run \texttt{test\_polyreg\_univariate.py} to test your implementation, which will plot the learned function.  In this case, the script fits a polynomial of degree $d=8$ with no regularization $\lambda = 0$.  From the plot, we see that the function fits the data well, but will not generalize well to new data points.  Try increasing the amount of regularization, and in 1-2 sentences, describe the resulting effect on the function (you may also provide an additional plot to support your analysis).
+
+    \rule{\textwidth}{0.25pt}
+
+    \subsection*{Solution}
+
+    Figure \ref{fig:poly_ref_d8} shows the polynomial regression with degree 8 and various $\lambda$ values where $\lambda$ is the regularization. As the regularization parameter ($\lambda$) increases, the function supposedly becomes more ``general'' but that is not actually what we want to do here because it is overgeneralizing and just flattening to a horizontal line near $y=3.5$. As $\lambda \rightarrow \infty$, the regression becomes linear at $y \approx 3.5$.
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.5\textwidth]{../../../hw1-code/homeworks/poly_regression/fig1.jpg}
+        \caption{Plot of the polynomial regression with degree 8, $\lambda$=0.}\label{fig:poly_reg}
+    \end{figure}
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.5\textwidth]{../../../hw1-code/homeworks/poly_regression/fig2.jpg}
+        \caption{Plot of the polynomial regression with degree 8 and various $\lambda$ values.} \label{fig:poly_ref_d8}
+    \end{figure}
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=\textwidth]{../../../hw1-code/homeworks/poly_regression/fig3.jpg} \label{fig:mse}
+        \caption{Plot of MSE of a trainng set (red) and a test set (blue). The dashed black line denotes the values where error $=1$.}
+    \end{figure}
+
 \end{aprob}
 
-\section*{Ridge Regression on MNIST}
-\begin{aprob}
-    In this problem we will implement a regularized least squares classifier for the MNIST data set. The task
-    is to classify handwritten images of numbers between $0$ to $9$.\\
-    
-    You are \textbf{NOT} allowed to use any of the pre-built  classifiers in \verb|sklearn|.  Feel free to use any method from \verb|numpy| or \verb|scipy|. {\bf Remember:} if you are inverting a matrix in your code, you are probably doing something wrong (Hint: look at \verb|scipy.linalg.solve|).\\
+\rule{\textwidth}{0.25pt}
 
-    Each example has features $x_i \in \R^d$ (with $d=28*28=784$) and label $z_j \in \{0,...,9\}$. You can visualize a single example $x_i$ with \texttt{imshow} after reshaping it to its original $28 \times 28$ image shape (and noting that the label $z_j$ is accurate). We wish to learn a predictor $\widehat{f}$ that takes as input a vector in $\R^d$ and outputs an index in $\{0,\cdots,9\}$. We define our training and testing classification error on a predictor $f$ as
-    \begin{align*}
-        \widehat{\epsilon}_{\textrm{train}}(f) &=
-        \frac{1}{N _{\textrm{train}}} \sum_{(x,z)\in \textrm{Training Set}}     \1\{ f(x) \neq z \}
-        \\
-          \widehat{\epsilon}_{\textrm{test}}(f) &=
-          \frac{1}{N _{\textrm{test}}} \sum_{(x,z)\in \textrm{Test Set}}     \1\{ f(x) \neq z \} 
-    \end{align*}
-    
-    We will use one-hot encoding of the labels: for each observation $(x,z)$, the original label $z \in \{0, \ldots, 9\}$ is mapped to the standard basis vector $e_{z+1}$ where $e_i$ is a vector of size $k$ containing all zeros except for a $1$ in the $i^{\textrm{th}}$ position (positions in these vectors are indexed starting at one, hence the $z+1$ offset for the digit labels). We adopt the notation where we have $n$ data points in our training objective with features $x_i \in \R^d$ and label one-hot encoded as $y_i \in \{0,1\}^k$. Here, $k=10$ since there are 10 digits.
-    
-    \begin{enumerate}
-        \item \points{10} In this problem we will choose a linear classifier to minimize the regularized least squares objective:
-        \begin{align*}
-            \widehat{W} = \text{argmin}_{W \in \R^{d \times k}} \sum_{i=1}^{n} \| W^Tx_{i} - y_{i} \|^{2}_{2} + \lambda \|W\|_{F}^{2}
-        \end{align*}
-        Note that $\|W\|_{F}$ corresponds to the Frobenius norm of $W$, i.e. $\|W\|_{F}^{2} = \sum_{i=1}^d \sum_{j=1}^k W_{i,j}^2$. To classify a point $x_i$ we will use the rule $\arg\max_{j=0,\cdots,9} e_{j+1}^T \widehat{W}^T x_i$. Note that if $W = \begin{bmatrix} w_1 & \cdots & w_k \end{bmatrix}$ then
-        \begin{align*}
-            \sum_{i=1}^{n} \| W^Tx_{i} - y_{i} \|^{2}_{2} + \lambda \|W\|_{F}^{2} &= \sum_{j=1}^k \left[  \sum_{i=1}^n ( e_j^T W^T x_i - e_j^T y_i)^2 + \lambda \| W e_j \|^2 \right] \\
-            &= \sum_{j=1}^k \left[  \sum_{i=1}^n ( w_j^T x_i - e_j^T y_i)^2 + \lambda \| w_j \|^2 \right] \\
-            &= \sum_{j=1}^k \left[  \| X w_j - Y e_j\|^2 + \lambda \| w_j \|^2 \right]
-        \end{align*}
-        where $X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top \in \R^{n \times d}$ and $Y = \begin{bmatrix} y_1 & \cdots & y_n \end{bmatrix}^\top \in \R^{n \times k}$. Show that
-        \begin{align*}
-            \widehat{W} = (X^T X + \lambda I)^{-1} X^T Y
-        \end{align*} 
-
-        \item \points{10} 
-        \begin{itemize}
-            \item Implement a function \verb|train| that takes as input $X \in\R^{n \times d}$, $Y \in \{0,1\}^{n \times k}$, $\lambda > 0$ and returns $\widehat{W} \in \R^{d \times k}$.
-            \item Implement a function \verb|one_hot| that takes as input $Y \in \{0, ..., k-1\}^{n}$, and returns $Y \in \{0,1\}^{n \times k}$.
-            \item Implement a function  \verb|predict| that takes as input $W \in \R^{d \times k}$, $X' \in\R^{m \times d}$ and returns an $m$-length vector with the $i$th entry equal to $\arg\max_{j=0,\cdots,9} e_j^T W^T x_i'$ where $x_i' \in \R^d$ is a column vector representing the $i$th example from $X'$.
-            \item Using the functions you coded above, train a model to estimate $\widehat{W}$ on the MNIST training data with $\lambda = 10^{-4}$, and make label predictions on the test data. This behavior is implemented in \verb|main| function provided in zip file. {\bf What is the training and testing error?} Note that they should both be about $15\%$. 
-        \end{itemize}
-    \end{enumerate}
-    
-    \subsubsection*{What to Submit:}
-    \begin{itemize}
-        \item \textbf{Part A:} Derivation of expression for $\widehat{W}$
-        \item \textbf{Part B:} Values of training and testing errors
-        \item \textbf{Code} on Gradescope through coding submission
-    \end{itemize}
-\end{aprob}
-
+\newpage
 \section*{Administrative}
 \begin{aprob}
 \begin{enumerate}
     \item \points{2} About how many hours did you spend on this homework? There is no right or wrong answer :)
+
+    Probably around 5 - 7 hours I did not keep count.
 \end{enumerate}
 
 \end{aprob}

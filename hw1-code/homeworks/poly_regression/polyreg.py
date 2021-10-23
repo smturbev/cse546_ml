@@ -19,8 +19,8 @@ class PolynomialRegression:
         self.reg_lambda: float = reg_lambda
         # Fill in with matrix with the correct shape
         self.weight: np.ndarray = None  # type: ignore
-        # You can add additional fields
-        raise NotImplementedError("Your Code Goes Here")
+        self.mean: np.ndarray = None
+        self.std: np.ndarray = None
 
     @staticmethod
     @problem.tag("hw1-A")
@@ -38,7 +38,10 @@ class PolynomialRegression:
                 Note that the returned matrix will not include the zero-th power.
 
         """
-        raise NotImplementedError("Your Code Goes Here")
+        X_ = np.zeros((X.shape[0],degree))
+        for i in range(degree):
+            X_[:,i] = X[:,0]**(i+1)
+        return X_
 
     @problem.tag("hw1-A")
     def fit(self, X: np.ndarray, y: np.ndarray):
@@ -52,7 +55,31 @@ class PolynomialRegression:
         Note:
             You need to apply polynomial expansion and scaling at first.
         """
-        raise NotImplementedError("Your Code Goes Here")
+        # expand the array using polyfeatures()
+        X_expanded = self.polyfeatures(X, self.degree)
+
+        # standardize
+        self.mean = np.mean(X_expanded, axis=0)
+        self.std  = np.std(X_expanded, axis=0)
+        n = len(X)
+        if n == 1:
+            X_standard = X
+        else:
+            X_standard = (X_expanded - self.mean) / self.std
+
+        # add 1s column
+        X_ = np.c_[np.ones([n, 1]), X_standard]
+
+        n, d = X_.shape
+        # remove 1 for the extra column of ones we added to get the original num features
+        d = d - 1
+
+        # construct reg matrix
+        reg_matrix = self.reg_lambda * np.eye(d + 1)
+        reg_matrix[0, 0] = 0
+
+        # analytical solution (X'X + regMatrix)^-1 X' y
+        self.weight = np.linalg.pinv(X_.T.dot(X_) + reg_matrix).dot(X_.T).dot(y)
 
     @problem.tag("hw1-A")
     def predict(self, X: np.ndarray) -> np.ndarray:
@@ -65,8 +92,18 @@ class PolynomialRegression:
         Returns:
             np.ndarray: Array of shape (n, 1) with predictions.
         """
-        raise NotImplementedError("Your Code Goes Here")
+        n = len(X)
+        # expand the array using polyfeatures()
+        X_expanded = self.polyfeatures(X, self.degree)
 
+        # standardize
+        X_standard = (X_expanded - self.mean) / self.std
+
+        # add 1s column
+        X_ = np.c_[np.ones([n, 1]), X_standard]
+
+        # predict
+        return X_@(self.weight)
 
 @problem.tag("hw1-A")
 def mean_squared_error(a: np.ndarray, b: np.ndarray) -> float:
@@ -79,8 +116,7 @@ def mean_squared_error(a: np.ndarray, b: np.ndarray) -> float:
     Returns:
         float: mean squared error between a and b.
     """
-    raise NotImplementedError("Your Code Goes Here")
-
+    return np.mean((a-b)**2)
 
 @problem.tag("hw1-A", start_line=5)
 def learningCurve(
@@ -116,4 +152,23 @@ def learningCurve(
     errorTrain = np.zeros(n)
     errorTest = np.zeros(n)
     # Fill in errorTrain and errorTest arrays
-    raise NotImplementedError("Your Code Goes Here")
+    for i in range(1,n):
+
+        # initialize new training set
+        Xtrain_new = Xtrain[0:i+1]
+        Ytrain_new = Ytrain[0:i+1]
+
+        # learning step
+        model  = PolynomialRegression(degree=degree, reg_lambda=reg_lambda)
+        weight = model.fit(Xtrain_new, Ytrain_new)
+
+        # prediction
+        Ytrain_predicted = model.predict(Xtrain_new)
+        Ytest_predicted  = model.predict(Xtest)
+
+        # compute difference from Ytrain_new and Ytrain_predicted
+        # as well as Ytest and Ytest_predicted
+        errorTrain[i] = mean_squared_error(Ytrain_predicted, Ytrain_new)
+        errorTest[i]  = mean_squared_error(Ytest, Ytest_predicted)
+
+    return (errorTrain, errorTest)

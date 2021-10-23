@@ -21,18 +21,21 @@ if __name__ == "__main__":
 
     # regression with degree = d
     d = 8
-    model = PolynomialRegression(degree=d, reg_lambda=0)
-    model.fit(X, y)
+    for i in range(0,50,10):
+        model = PolynomialRegression(degree=d, reg_lambda=i)
+        model.fit(X, y)
 
-    # output predictions
-    xpoints = np.linspace(np.max(X), np.min(X), 100).reshape(-1, 1)
-    ypoints = model.predict(xpoints)
+        # output predictions
+        xpoints = np.linspace(np.max(X), np.min(X), 100).reshape(-1, 1)
+        ypoints = model.predict(xpoints)
 
-    # plot curve
-    plt.figure()
-    plt.plot(X, y, "rx")
-    plt.title(f"PolyRegression with d = {d}")
-    plt.plot(xpoints, ypoints, "b-")
-    plt.xlabel("X")
-    plt.ylabel("Y")
+        # plot curve
+        # plt.figure()
+        plt.plot(X, y, "rx")
+        plt.title(f"PolyRegression with d = {d}")
+        plt.plot(xpoints, ypoints, "-", label=f"$\lambda=${int(i)}")
+        plt.xlabel("X")
+        plt.ylabel("Y")
+    plt.legend()
+    plt.savefig("fig2.jpg")
     plt.show()

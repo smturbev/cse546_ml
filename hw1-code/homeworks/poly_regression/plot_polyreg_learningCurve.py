@@ -31,6 +31,7 @@ def plotLearningCurve(errorTrain, errorTest, regLambda, degree):
     plt.yscale("log")
     plt.ylim(top=maxY)
     plt.xlim((minX, 10))
+    plt.legend()
 
 
 def generateLearningCurve(X, y, degree, regLambda):
@@ -89,4 +90,5 @@ if __name__ == "__main__":
     generateLearningCurve(X, y, 8, 1)
     plt.subplot(2, 3, 6)
     generateLearningCurve(X, y, 8, 100)
+    plt.savefig("fig3.jpg")
     plt.show()
