@@ -1,0 +1,383 @@
+\documentclass{article}
+\usepackage{import}
+\subimport*{../../}{macro}
+
+\usepackage{import}
+\usepackage[ruled]{algorithm2e}
+\usepackage[shortlabels]{enumitem}
+
+\setlength\parindent{0px}
+
+\begin{document}
+\setcounter{aprob}{0}
+\setcounter{bprob}{0}
+\title{Homework \#2}
+\author{
+    \normalsize{CSE 446/546: Machine Learning}\\
+    \normalsize{Profs. Jamie Morgenstern and Simon Du}\\
+    \normalsize{Due: \textbf{Wednesday} November 3, 2021 11:59pm}\\
+    \normalsize{\textbf{A:} 96 points, \textbf{B:} 29 points}
+}
+\date{{}}
+\maketitle
+
+\noindent Please review all homework guidance posted on the website before submitting to GradeScope. Reminders:
+\begin{itemize}
+    \item Make sure to read the ``What to Submit'' section following each question and include all items.
+    \item Please provide succinct answers and supporting reasoning for each question. Similarly, when discussing experimental results, concisely create tables and/or figures when appropriate to organize the experimental results. All explanations, tables, and figures for any particular part of a question must be grouped together. 
+    \item For every problem involving generating plots, please include the plots as part of your PDF submission.
+    \item When submitting to Gradescope, please link each question from the homework in Gradescope to the location of its answer in your homework PDF. Failure to do so may result in deductions of up to \points{5}. For instructions, see \url{https://www.gradescope.com/get_started#student-submission}.
+    \item Please recall that B problems, indicated in \boxed{\textrm{boxed text}}, are only graded for 546 students, and that they will be weighted at most 0.2 of your final GPA (see the course website for details). In Gradescope, there is a place to submit solutions to A and B problems separately. You are welcome to create a single PDF that contains answers to both and submit the same PDF twice, but associate the answers with the individual questions in Gradescope. 
+    \item If you collaborate on this homework with others, you must indicate who you worked with on your homework. Failure to do so may result in accusations of plagiarism.
+    \item For every problem involving code, please include the code as part of your PDF for the PDF submission \emph{in addition to} submitting your code to the separate assignment on Gradescope created for code. Not submitting all code files will lead to a deduction of \points{1}.  
+    \item Please indicate your final answer to each question by placing a box around the main result(s). To do this in \LaTeX, one option is using the \texttt{boxed} command.
+\end{itemize}
+
+Not adhering to these reminders may result in point deductions. \\
+
+% \textcolor{red}{\textbf{Changelog:}}
+
+% \begin{itemize}
+%     \item \textbf{Date:} Changed This.
+% \end{itemize}
+
+\clearpage{}
+
+
+% Start of Problems:
+
+\section*{Short Answer and ``True or False'' Conceptual questions}
+
+\begin{aprob}
+    The answers to these questions should be answerable without referring to external materials.  Briefly justify your answers with a few words.
+    \begin{enumerate}
+      \item \points{2} Suppose that your estimated model for predicting house prices has a large positive weight on the feature \texttt{number of bathrooms}. If we remove this feature and refit the model, will the new model have a strictly higher error than before? Why?
+      \item \points{2} Compared to L2 norm penalty, explain why a L1 norm penalty is more likely to result in sparsity (a larger number of 0s) in the weight vector.
+      \item \points{2} In at most one sentence each, state one possible upside and one possible downside of using the following regularizer: $\left(\sum_{i}\left|w_{i}\right|^{0.5}\right)$.
+      \item \points{1} True or False: If the step-size for gradient descent is too large, it may not converge.
+      \item \points{2} In your own words, describe why stochastic gradient descent (SGD) works, even though only a small portion of the data is considered at each update.
+      \item \points{2} In at most one sentence each, state one possible advantage of SGD over GD (gradient descent), and one possible disadvantage of SGD relative to GD.
+    \end{enumerate}
+    
+    \subsection*{What to Submit:}
+    \begin{itemize}
+        \item \textbf{Part d:} True or False. 
+        \item \textbf{Parts a-f:} Brief (2-3 sentence) explanation.
+    \end{itemize}
+\end{aprob}
+
+\section*{Convexity and Norms }
+
+\begin{aprob}
+    A \emph{norm} $\|\cdot\|$ over $\R^n$ is defined by the properties:
+    (\textit{i}) non-negativity: $\|x\|\geq 0$ for all $x \in \R^n$ with equality if and only if $x=0$,
+    (\textit{ii}) absolute scalability: $\|a \, x\| = |a| \, \|x\|$ for all $a \in \R$ and $x \in \R^n$, 
+    (\textit{iii}) triangle inequality: $\|x+y\| \leq \|x\| + \|y\|$ for all $x,y \in \R^n$.
+    \begin{enumerate}
+      \item \points{3} Show that $f(x) = \left( \sum_{i=1}^n |x_i| \right)$ is a norm. (Hint: for (\textit{iii}), begin by showing that $|a+b|\leq |a| + |b|$ for all $a,b \in \R$.)
+      \item \points{2} Show that $g(x) = \left(\sum_{i=1}^n |x_i|^{1/2}\right)^2$ is not a norm. (Hint: it suffices to find two points in $n=2$ dimensions such that the triangle inequality does not hold.)
+    \end{enumerate} 
+    Context: norms are often used in regularization to encourage specific behaviors of solutions. If we define  $\| x \|_p := \left( \sum_{i=1}^n |x_i|^{p} \right)^{1/p}$ then one can show that $\| x \|_p$ is a norm for all $p \geq 1$. The important cases of $p=2$ and $p=1$ correspond to the penalty for ridge regression and the lasso, respectively. \\
+    
+    \subsection*{What to Submit:}
+    \begin{itemize}
+        \item \textbf{Parts a, b:} Proof.
+    \end{itemize}
+\end{aprob}
+
+\begin{bprob}
+    A set $A \subseteq \R^n$ is \emph{convex} if $\lambda x + (1-\lambda) y \in A$ for all $x,y\in A$ and $\lambda \in [0,1]$. Let $\| \cdot \|$ be a norm.
+    \begin{enumerate}
+        \item \points{3} Show that $f(x) = \| x \|$ is a convex function.
+        \item \points{3} Show that $\{ x \in \R^n : \|x\| \leq 1\}$ is a convex set.
+        \item \points{2} Draw a picture of the set $\{ (x_1,x_2) ~: ~ g(x_1,x_2) \le 4 \}$
+        where $g(x_1, x_2)  = \left( |x_1|^{1/2} + |x_2|^{1/2}\right)^2$. (This is the function considered in 1b above specialized to $n=2$.) We know $g$ is not a norm. Is the defined set convex? Why not?
+    \end{enumerate}
+    Context: It is a fact that a function $f$ defined over a set $A \subseteq \R^n$ is convex if and only if the set $\{ (x, z) \in \R^{n+1} : z \geq f(x), x \in A \}$ is convex. Draw a picture of this for yourself to be sure you understand it.
+
+    \subsection*{What to Submit:}
+    \begin{itemize}
+        \item \textbf{Parts a, b:} Proof.
+        \item \textbf{Part c:} A picture of the set, and 1-2 sentence explanation.
+    \end{itemize}
+\end{bprob}
+
+\begin{bprob}
+    For $i=1,\dots,n$ let $\ell_i(w)$ be convex functions over $w \in \R^d$ (e.g., $\ell_i(w) = (y_i - w^\top x_i)^2$), $\| \cdot \|$ is any norm, and $\lambda >0$. 
+    \begin{enumerate}
+        \item \points{3} Show that 
+        \begin{align*}
+            \sum_{i=1}^n \ell_i(w) + \lambda \| w \|
+        \end{align*}
+        is convex over $w\in \R^d$ (Hint: Show that if $f,g$ are convex functions, then $f(x) + g(x)$ is also convex.) 
+        \item \points{1} Explain in one sentence why we prefer to use loss functions and regularized loss functions that are convex.
+    \end{enumerate}
+
+    \subsubsection*{What to Submit}
+    \begin{itemize}
+        \item \textbf{Part a:} Proof.
+        \item \textbf{Part b:} 1-2 sentence explanation.
+    \end{itemize}
+\end{bprob}
+
+\section*{Lasso on a Real Dataset}
+
+\subsection*{A Lasso Algorithm}
+Given $\lambda >0$ and data $\Big (x_i,y_i \Big)_{i=1}^n$, the Lasso is the problem of solving
+\begin{equation*}\label{eq:lasso}
+  \arg\min_{{w}\in \R^d, b \in \R} \sum_{i=1}^n { (x_i^T {w} + b - {y}_i)^2 }
+    + \lambda \sum_{j=1}^d |{w}_j| 
+\end{equation*}
+where $\lambda$ is a regularization parameter.
+For the programming part of this homework, we have implemented the coordinate descent method shown in Algorithm~\ref{alg:cd} to solve the Lasso problem for you.
+
+\begin{algorithm}[h]
+    \caption{Coordinate Descent Algorithm for Lasso}\label{alg:cd}
+    \While{not converged}{
+      $b \leftarrow \frac{1}{n}\sum_{i=1}^n \left({y}_i - \sum_{j=1}^d {w}_j {x}_{i,j}\right)$\\ 
+      \For{$k \in \{1,2,\cdots d\}$} {
+        $a_k\leftarrow 2 \sum_{i=1}^n {x}_{i,k}^2$ \\   
+        $c_k\leftarrow 2 \sum_{i=1}^n {x}_{i,k} \left({y}_i -(b + \sum_{j\neq k} {w}_j {x}_{i,j} )\right)$ \\
+        ${w}_k \leftarrow 
+        \left\{
+        \begin{array}{ll}
+          (c_k+\lambda) / a_k & c_k < -\lambda\\
+          0 & c_k\in [-\lambda, \lambda]\\
+          (c_k-\lambda) / a_k & c_k > \lambda\\
+        \end{array}  
+        \right.
+        $
+      }
+    }
+\end{algorithm}
+
+    You will often apply Lasso on the same dataset for many values of $\lambda$.  This
+    is called a regularization path.  One way to do this efficiently is to start at a large $\lambda$, and then for each consecutive solution, initialize the algorithm with the previous solution, decreasing $\lambda$ by a constant ratio (e.g., by a factor of $2$).
+  
+  The smallest value of $\lambda$ for which the solution $\widehat{w}$ is entirely zero is given by
+       \begin{align}
+           \lambda_{max} = \max_{k=1,\dots,d} 2 \left|\sum_{i=1}^n {x}_{i,k} \left({y}_i - \left(\frac{1}{n} \sum_{j=1}^n y_j \right)\right)\right|\label{eqn:lasso-lambdamax}
+       \end{align}
+      This is helpful for choosing the first $\lambda$ in a regularization path. 
+
+    A benefit of the Lasso is that if we believe many features are irrelevant for predicting ${y}$, the Lasso can be used to enforce a sparse solution, effectively differentiating between the relevant and irrelevant features.
+    
+    \subsection*{Dataset}
+
+    Download the training data set ``crime-train.txt'' and the test data set ``crime-test.txt'' from the course website. Store your data in your working directory, ensure you have \texttt{pandas} installed, and read in the files with the following Python code:
+    
+    \begin{verbatim}
+        import pandas as pd
+        df_train = pd.read_table("crime-train.txt")
+        df_test = pd.read_table("crime-test.txt")
+    \end{verbatim}
+
+    This stores the data as Pandas \texttt{DataFrame} objects. \texttt{DataFrame}s are similar to Numpy \texttt{array}s but more flexible; unlike \texttt{array}s, \texttt{DataFrame}s store row and column indices along with the values of the data. Each column of a \texttt{DataFrame} can also store data of a different type (here, all data are floats). 
+
+    Here are a few commands that will get you working with Pandas for this assignment:
+
+    \begin{verbatim}
+        df.head()                   # Print the first few lines of DataFrame df.
+        df.index                    # Get the row indices for df.
+        df.columns                  # Get the column indices.
+        df[``foo'']                # Return the column named ``foo''.
+        df.drop(``foo'', axis = 1)  # Return all columns except ``foo''.
+        df.values                   # Return the values as a Numpy array.
+        df[``foo''].values         # Grab column foo and convert to Numpy array.
+        df.iloc[:3,:3]              # Use numerical indices (like Numpy) to get 3 rows and cols.
+    \end{verbatim}
+
+    The data consist of local crime statistics for 1,994 US communities. The response $y$ is the rate of violent crimes reported per capita in a community. The name of the response variable is \texttt{ViolentCrimesPerPop}, and it is held in the first column of \texttt{df\_train} and \texttt{df\_test}. There are 95 features. These
+    features include many variables.
+    
+    Some features are the consequence of complex political processes, such as the size of the police force and other systemic and historical factors. Others are demographic
+    characteristics of the community, including self-reported statistics about race, age, education, and employment drawn from Census reports.\\
+
+    The dataset is split into a training and test set with 1,595 and 399 entries, respectively. The features have been standardized to have mean 0 and variance 1. 
+    We will use this training set to fit a model to predict the crime rate in new communities and evaluate model performance on the test set.  As there are a considerable number of input variables and fairly few training observations, overfitting is a serious issue, and the coordinate descent Lasso algorithm may mitigate this problem during training. \\
+    
+    The goals of this problem are threefold: ($i$) to encourage you to think about how data collection processes affect the resulting model trained from that data; ($ii$) to encourage you to think deeply about models you might train and how they might be misused; and ($iii$) to see how Lasso encourages sparsity of linear models in settings where $d$ is large relative to $n$. \textbf{We emphasize that training a model on this dataset can suggest a degree of correlation between a community's demographics and the rate at which a community experiences and reports violent crime. We strongly encourage students to consider why these correlations may or may not hold more generally, whether correlations might result from a common cause, and what issues can result in misinterpreting what a model can explain.}\\
+    
+\subsection*{Applying Lasso}
+
+  
+\begin{aprob} 
+    
+    \begin{enumerate}
+        \item \points{4} Read the documentation for the original version of this dataset: \url{http://archive.ics.uci.edu/ml/datasets/communities+and+crime}. Report 3 features included in this dataset for which historical \emph{policy} choices in the US would lead to variability in these features. As an example, the \emph{number of police} in a community is often the consequence of decisions made by governing bodies, elections, and amount of tax revenue available to decision makers.
+        \item \points{4} Before you train a model, describe 3 features in the dataset which might, if found to have nonzero weight in model, be interpreted as \emph{reasons} for higher levels of violent crime, but which might actually be a \emph{result} rather than (or in addition to being) the cause of this violence.
+    \end{enumerate}
+
+    Now, we will run the Lasso solver. Begin with $\lambda = \lambda_{\max}$ defined in Equation \eqref{eqn:lasso-lambdamax}. Initialize all weights to $0$. Then, reduce $\lambda$ by a factor of 2 and run again, but this time initialize $\hat{{w}}$ from your $\lambda = \lambda_{\max}$ solution as your initial weights, as described above. Continue the process of reducing $\lambda$ by a factor of 2 until $\lambda < 0.01$.
+    For all plots use a log-scale for the $\lambda$ dimension (Tip: use
+    \verb|plt.xscale('log')|).
+    \\
+    
+    
+    \begin{enumerate}
+        \item[c.] \points{4} Plot the number of nonzero weights of each solution as a function of $\lambda$.
+        \item[d.] \points{4} Plot the regularization paths (in one plot) for the coefficients for input variables \texttt{agePct12t29}, \texttt{pctWSocSec}, \texttt{pctUrban}, \texttt{agePct65up}, and \texttt{householdsize}.
+        \item[e.] \points{4} On one plot, plot the squared error on the training and test data as a function of $\lambda$.
+        \item[f.] \points{4} Sometimes a larger value of $\lambda$ performs nearly as well as a smaller value, but a larger value will select fewer variables and perhaps be more interpretable.  Inspect the weights $\hat{w}$ for $\lambda = 30$.  Which feature had the largest (most positive) Lasso coefficient? What about the most negative? Discuss briefly.
+        \item[g.] \points{4} Suppose there was a large negative weight on \texttt{agePct65up} and upon seeing this result, a politician suggests policies that encourage people over the age of 65 to move to high crime areas in an effort to reduce crime. What is the (statistical) flaw in this line of reasoning? (Hint: fire trucks
+        are often seen around burning buildings, do fire trucks cause fire?)
+    \end{enumerate}  
+
+    \subsection*{What to Submit:}
+    \begin{itemize}
+        \item \textbf{Parts a, b:} 1-2 sentence explanation.
+        \item \textbf{Part c:} Plot 1.
+        \item \textbf{Part d:} Plot 2.
+        \item \textbf{Part e:} Plot 3.
+        \item \textbf{Parts f, g:} Answers and 1-2 sentence explanation.
+        \item \textbf{Code} on Gradescope through coding submission.
+    \end{itemize}
+\end{aprob}
+
+\section*{Logistic Regression}
+\subsection*{Binary Logistic Regression} 
+\begin{aprob}
+    Here we consider the MNIST dataset, but for binary classification. Specifically, the task is to determine whether a digit is a $2$ or $7$.
+    Here, let $Y=1$ for all the ``7'' digits in the dataset, and use $Y=-1$ for ``2''.
+    We will use regularized logistic regression. 
+    Given a binary classification dataset $\{(x_i,y_i)\}_{i=1}^n$ for $x_i \in \R^d$ and $y_i \in \{-1,1\}$ we showed in class that the regularized negative log likelihood objective function can be written as
+    \begin{align*}
+    J(w,b) = \frac{1}{n} \sum_{i=1}^n \log( 1 + \exp(-y_i (b + x_i^T w))) + \lambda ||w||_2^2
+    \end{align*} 
+    Note that the offset term $b$ is not regularized. 
+    For all experiments, use $\lambda = 10^{-1}$. 
+    Let $\mu_i(w,b) = \frac{1}{1+ \exp(-y_i (b + x_i^T w))}$. 
+    \begin{enumerate}
+        \item \points{8} Derive the gradients $\nabla_w J(w,b)$, $\nabla_{b} J(w,b)$ and give your answers in terms of $\mu_i(w,b)$ (your answers should not contain exponentials).
+        \item \points{8} Implement gradient descent with an initial iterate of all zeros. Try several values of step sizes to find one that appears to make convergence on the training set as fast as possible. Run until you feel you are near to convergence.
+        \begin{enumerate}[(i)]
+            \item For both the training set and the test, plot $J(w,b)$ as a function of the iteration number (and show both curves on the same plot).  
+            \item For both the training set and the test, classify the points according to the rule $\text{sign}(b + x_i^T w)$ and plot the misclassification error as a function of the iteration number (and show both curves on the same plot). 
+        \end{enumerate}
+          
+        Reminder: Make sure you are only using the test set for evaluation (not for training).
+          
+        \item \points{7} Repeat (b) using stochastic gradient descent with a batch size of 1. Note, the expected gradient with respect to the random selection should be equal to the gradient found in part (a). Show both plots described in (b) when using batch size 1. Take careful note of how to scale the regularizer.
+        \item \points{7} Repeat (b) using stochastic gradient descent with batch size of 100. That is, instead of approximating the gradient with a single example, use 100. Note, the expected gradient with respect to the random selection should be equal to the gradient found in part (a).
+    \end{enumerate}
+    
+    \subsection*{What to Submit}
+    \begin{itemize}
+        \item \textbf{Part a:} Proof
+        \item \textbf{Part b:} Separate plots for b(i) and b(ii).
+        \item \textbf{Part c:} Separate plots for c which reproduce those from b(i) and b(ii) for this case.
+        \item \textbf{Part d:} Separate plots for c which reproduce those from b(i) and b(ii) for this case.
+        \item \textbf{Code} on Gradescope through coding submission.
+    \end{itemize}
+\end{aprob}
+
+\section*{Ridge Regression on MNIST}
+
+\textbf{These problems were moved from HW1 and are reproduced identically here. If you already started these, you may wish to reuse your work from HW1.}
+\begin{aprob}
+    In this problem we will implement a regularized least squares classifier for the MNIST data set. The task
+    is to classify handwritten images of numbers between $0$ to $9$.\\
+    
+    You are \textbf{NOT} allowed to use any of the pre-built  classifiers in \verb|sklearn|.  Feel free to use any method from \verb|numpy| or \verb|scipy|. {\bf Remember:} if you are inverting a matrix in your code, you are probably doing something wrong (Hint: look at \verb|scipy.linalg.solve|).\\
+
+    Each example has features $x_i \in \R^d$ (with $d=28*28=784$) and label $z_j \in \{0,\dots,9\}$. You can visualize a single example $x_i$ with \texttt{imshow} after reshaping it to its original $28 \times 28$ image shape (and noting that the label $z_j$ is accurate). We wish to learn a predictor $\widehat{f}$ that takes as input a vector in $\R^d$ and outputs an index in $\{0,\dots,9\}$. We define our training and testing classification error on a predictor $f$ as
+    \begin{align*}
+        \widehat{\epsilon}_{\textrm{train}}(f) &=
+        \frac{1}{N _{\textrm{train}}} \sum_{(x,z)\in \textrm{Training Set}}     \1\{ f(x) \neq z \}
+        \\
+          \widehat{\epsilon}_{\textrm{test}}(f) &=
+          \frac{1}{N _{\textrm{test}}} \sum_{(x,z)\in \textrm{Test Set}}     \1\{ f(x) \neq z \} 
+    \end{align*}
+    
+    We will use one-hot encoding of the labels: for each observation $(x,z)$, the original label $z \in \{0, \ldots, 9\}$ is mapped to the standard basis vector $e_{z+1}$ where $e_i$ is a vector of size $k$ containing all zeros except for a $1$ in the $i^{\textrm{th}}$ position (positions in these vectors are indexed starting at one, hence the $z+1$ offset for the digit labels). We adopt the notation where we have $n$ data points in our training objective with features $x_i \in \R^d$ and label one-hot encoded as $y_i \in \{0,1\}^k$. Here, $k=10$ since there are 10 digits.
+    
+    \begin{enumerate}
+        \item \points{10} In this problem we will choose a linear classifier to minimize the regularized least squares objective:
+        \begin{align*}
+            \widehat{W} = \text{argmin}_{W \in \R^{d \times k}} \sum_{i=1}^{n} \| W^Tx_{i} - y_{i} \|^{2}_{2} + \lambda \|W\|_{F}^{2}
+        \end{align*}
+        Note that $\|W\|_{F}$ corresponds to the Frobenius norm of $W$, i.e. $\|W\|_{F}^{2} = \sum_{i=1}^d \sum_{j=1}^k W_{i,j}^2$. To classify a point $x_i$ we will use the rule $\arg\max_{j=0,\dots,9} e_{j+1}^T \widehat{W}^T x_i$. Note that if $W = \begin{bmatrix} w_1 & \dots & w_k \end{bmatrix}$ then
+        \begin{align*}
+            \sum_{i=1}^{n} \| W^Tx_{i} - y_{i} \|^{2}_{2} + \lambda \|W\|_{F}^{2} &= \sum_{j=1}^k \left[  \sum_{i=1}^n ( e_j^T W^T x_i - e_j^T y_i)^2 + \lambda \| W e_j \|^2 \right] \\
+            &= \sum_{j=1}^k \left[  \sum_{i=1}^n ( w_j^T x_i - e_j^T y_i)^2 + \lambda \| w_j \|^2 \right] \\
+            &= \sum_{j=1}^k \left[  \| X w_j - Y e_j\|^2 + \lambda \| w_j \|^2 \right]
+        \end{align*}
+        where $X = \begin{bmatrix} x_1 & \dots & x_n \end{bmatrix}^\top \in \R^{n \times d}$ and $Y = \begin{bmatrix} y_1 & \dots & y_n \end{bmatrix}^\top \in \R^{n \times k}$. Show that
+        \begin{align*}
+            \widehat{W} = (X^T X + \lambda I)^{-1} X^T Y
+        \end{align*} 
+
+        \item \points{10} 
+        \begin{itemize}
+            \item Implement a function \verb|train| that takes as input $X \in\R^{n \times d}$, $Y \in \{0,1\}^{n \times k}$, $\lambda > 0$ and returns $\widehat{W} \in \R^{d \times k}$.
+            \item Implement a function \verb|one_hot| that takes as input $Y \in \{0, ..., k-1\}^{n}$, and returns $Y \in \{0,1\}^{n \times k}$.
+            \item Implement a function  \verb|predict| that takes as input $W \in \R^{d \times k}$, $X' \in\R^{m \times d}$ and returns an $m$-length vector with the $i$th entry equal to $\arg\max_{j=0,\dots,9} e_j^T W^T x_i'$ where $x_i' \in \R^d$ is a column vector representing the $i$th example from $X'$.
+            \item Using the functions you coded above, train a model to estimate $\widehat{W}$ on the MNIST training data with $\lambda = 10^{-4}$, and make label predictions on the test data. This behavior is implemented in \verb|main| function provided in zip file. {\bf What is the training and testing error?} Note that they should both be about $15\%$. 
+        \end{itemize}
+    \end{enumerate}
+    
+    \subsubsection*{What to Submit:}
+    \begin{itemize}
+        \item \textbf{Part A:} Derivation of expression for $\widehat{W}$
+        \item \textbf{Part B:} Values of training and testing errors
+        \item \textbf{Code} on Gradescope through coding submission
+    \end{itemize}
+\end{aprob}
+
+\begin{bprob}
+    \begin{enumerate}
+        
+        \item \points{5} Instead of reporting just the test error, which is an unbiased estimate of the \emph{true} error, we would like to report a \emph{confidence interval} around the test error that contains the true error.
+        \begin{lemma}(Hoeffding's inequality)
+            Fix $\delta \in (0,1)$. If for all $i=1,\dots,m$ we have that $X_i$ are i.i.d. random variables with $X_i \in [a,b]$ and $\mathbb{E}[X_i] = \mu$ then
+            \begin{align*}
+                \P\left( \left| \left(\frac{1}{m} \sum_{i=1}^m X_i\right) - \mu \right| \geq \sqrt{\frac{(b-a)^2\log(2/\delta)}{2m}} \right) \leq \delta
+            \end{align*}
+        \end{lemma}
+        We will use the above equation to construct a confidence interval around the true classification error $\epsilon(\widehat{f})=\mathbb{E}_{\text{test}}[\widehat{\epsilon}_{\textrm{test}}(\widehat{f})]$ since the test error $\widehat{\epsilon}_{\textrm{test}}(\widehat{f})$ is just the average of indicator variables taking values in $\{0,1\}$ corresponding to the $i$th test example being classified correctly or not, respectively, where an error happens with probability $\mu=\epsilon(\widehat{f})=\mathbb{E}_{\text{test}}[\widehat{\epsilon}_{\textrm{test}}(\widehat{f})]$, the \emph{true} classification error. 
+        
+        Let $\widehat{p}$ be the value of $p$ that approximately minimizes the validation error on the plot you just made and use $\widehat{f}(x) = \arg\max_j x^T \widehat{W}^{\widehat{p}} e_j$ to compute the classification test error $\widehat{\epsilon}_{\textrm{test}}(\widehat{f})$. Use Hoeffding's inequality, of above, to compute a confidence interval that contains $\mathbb{E}_{\text{test}}[\widehat{\epsilon}_{\textrm{test}}(\widehat{f})]$ (i.e., the \emph{true} error) with probability at least $0.95$ (i.e., $\delta=0.05$). Report $\widehat{\epsilon}_{\textrm{test}}(\widehat{f})$ and the confidence interval. 
+    \end{enumerate}
+    
+    \subsubsection*{What to Submit:}
+    \begin{itemize}
+        \item \textbf{Part a:} Testing error along with confidence interval around it.
+    \end{itemize}
+\end{bprob}
+\section*{Confidence Interval of Least Squares Estimation}
+\subsection*{Bounding the Estimate} 
+\begin{bprob}
+    Let us consider the setting, where we have $n$ inputs, $X_1, ..., X_n \in \R^d$, and $n$ observations $Y_i = \langle X_i, \beta^* \rangle + \epsilon_i$, for $i = 1, ..., n$. Here, $\beta^*$ is a ground truth vector in $\R^d$ that we are trying to estimate, the noise $\epsilon_i \sim \mathcal{N}(0, 1)$, and the $n$ examples piled up --- $X \in R^{n\times d}$. To estimate, we use the least squares estimator $\widehat{\beta} = \min_\beta \lVert X\beta - Y\rVert_2^2$. Moreover, we will use $n=20000$ and $d=10000$ in this problem.
+
+    \begin{enumerate}
+        \item \points{3} Show that $\widehat{\beta}_j \sim \mathcal{N}(\beta_j^*, (X^T X)^{-1}_{j, j})$ for each $j = 1, ..., d$. \emph{(Hint: see notes on confidence intervals from lecture.)}
+        \item \points{4} Fix $\delta \in (0,1)$ suppose $\beta^* = 0$. Applying the proposition from the notes, conclude that for each $j \in [d]$, with probability at least $1-\delta$, $|\widehat{\beta}_j| \leq \sqrt{2(X^TX)^{-1}_{j, j} \log(2 / \delta)}$.
+        Can we conclude that with probability at least $1-\delta$,  $|\widehat{\beta}_j| \leq \sqrt{2(X^TX)^{-1}_{j, j} \log(2 / \delta)}$ for all $j \in [d]$ simultaneously? Why or why not?
+        \item \points{5} Let's explore this question empirically. Assume data is generated as $x_i = \sqrt{(i \mod d) + 1} \cdot e_{(i \mod d) + 1}$ where $e_i$ is the $i$th canonical vector and $i \mod d$ is the remainder of $i$ when divided by $d$. Generate each $y_i$ according to the model above. 
+        Compute $\widehat{\beta}$ and plot each $\widehat{\beta}_j$ as a scatter plot with the $x$-axis as $j \in \{1,\dots,d\}$. Plot $\pm \sqrt{2(X^TX)^{-1}_{j, j} \log(2 / \delta)}$ as the upper and lower confidence intervals with $1 - \delta = 0.95$. How many $\widehat{\beta}_j$'s are outside the confidence interval?  \emph{Hint: Due to the special structure of how we generated $x_i$, we can compute $(X^TX)^{-1}$ analytically without computing an inverse explicitly.}
+        
+        
+        
+    \end{enumerate}
+
+    \subsection*{What to Submit:}
+    \begin{itemize}
+        \item \textbf{Parts a, b:} Proof.
+        \item \textbf{Part b:} Answer.
+        \item \textbf{Part c:} Plots of $\hat{\beta}$ and its confidence interval \textbf{on the same plot}.
+        % \item \textbf{Part d:} Value of $\gamma$ and proof.
+        % \item \textbf{Part e:} Conditions and proof.
+        % \item \textbf{Part f:} Proof.
+    \end{itemize}
+\end{bprob}
+
+
+\section*{Administrative}
+\begin{aprob}
+\begin{enumerate}
+    \item \points{2} About how many hours did you spend on this homework? There is no right or wrong answer :)
+\end{enumerate}
+
+\end{aprob}
+
+\end{document}

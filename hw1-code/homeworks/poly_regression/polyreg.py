@@ -1,4 +1,5 @@
 """
+    polyreg.py
     Template for polynomial regression
     AUTHOR Eric Eaton, Xiaoxiang Hu
 """
