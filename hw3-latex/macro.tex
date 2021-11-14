@@ -1,0 +1,112 @@
+% calculus
+% the differential operator
+\makeatletter
+\providecommand*{\diff}
+{\@ifnextchar^{\DIfF}{\DIfF^{}}}
+\def\DIfF^#1{
+	\mathop{\mathrm{\mathstrut d}}
+	\nolimits^{#1}\gobblespace}
+\def\gobblespace{
+	\futurelet\diffarg\opspace}
+\def\opspace{
+	\let\DiffSpace\!
+	\ifx\diffarg(
+	\let\DiffSpace\relax
+	\else
+	\ifx\diffarg[
+	\let\DiffSpace\relax
+	\else
+	\ifx\diffarg\{
+	\let\DiffSpace\relax
+	\fi\fi\fi\DiffSpace}
+
+\providecommand*{\pdiff}
+{\@ifnextchar^{\pDIfF}{\pDIfF^{}}}
+\def\pDIfF^#1{
+	\mathop{\mathrm{\mathstrut \partial}}
+	\nolimits^{#1}\gobblespace}
+\def\gobblespace{
+	\futurelet\diffarg\opspace}
+\def\opspace{
+	\let\DiffSpace\!
+	\ifx\diffarg(
+	\let\DiffSpace\relax
+	\else
+	\ifx\diffarg[
+	\let\DiffSpace\relax
+	\else
+	\ifx\diffarg\{
+	\let\DiffSpace\relax
+	\fi\fi\fi\DiffSpace}
+
+% derivative and partial derivative operators
+\providecommand*{\deriv}[3][]{\frac{\diff^{#1}{#2}}{\diff {#3}^{#1}}}
+\providecommand*{\pderiv}[3][]{\frac{\pdiff^{#1}{#2}}{\pdiff {#3}^{#1}}}
+\providecommand*{\pderivcross}[3]{\frac{\pdiff^{2} {#1}}{\pdiff {#2} \pdiff {#3} }}
+
+% Set notations
+\providecommand\given{}
+\newcommand\SetSymbol[1][]{%
+	\nonscript\:#1\vert
+	\allowbreak
+	\nonscript\:
+	\mathopen{}}
+\DeclarePairedDelimiterX\Set[1]\{\}{%
+	\renewcommand\given{\SetSymbol[\delimsize]}
+	#1
+}
+\newcommand{\set}[1]{\Set*{#1}}
+
+
+% probability
+\DeclarePairedDelimiterXPP\prob[1]{\mathop{\mathbb{P}}}{\lbrace}{\rbrace}{}{\renewcommand\given{\nonscript\:\delimsize\vert\nonscript\:\mathopen{}}#1}
+\newcommand{\Prob}[1]{\prob*{#1}}
+
+\DeclarePairedDelimiterXPP\probability[2]{\mathop{\mathbb{P}}_{#1}}{\lbrace}{\rbrace}{}{\renewcommand\given{\nonscript\:\delimsize\vert\nonscript\:\mathopen{}}#2}
+\newcommand{\Probability}[2]{\probability*{#1}{#2}}
+
+\DeclarePairedDelimiterXPP\expectation[1]{\mathop{\mathbb{E}}}{\lbrack}{\rbrack}{}{\renewcommand\given{\nonscript\:\delimsize\vert\nonscript\:\mathopen{}}#1}
+\newcommand{\E}[1]{\expectation*{#1}}
+
+\DeclarePairedDelimiterXPP\expectationdist[2]{\mathop{\mathbb{E}}_{#1}}{\lbrack}{\rbrack}{}{\renewcommand\given{\nonscript\:\delimsize\vert\nonscript\:\mathopen{}}#2}
+\newcommand{\Exp}[2]{\expectationdist*{#1}{#2}}
+
+\DeclarePairedDelimiterXPP\variance[1]{\mathop{\mathrm{Var}}}{\lbrack}{\rbrack}{}{\renewcommand\given{\nonscript\:\delimsize\vert\nonscript\:\mathopen{}}#1}
+\newcommand{\Var}[1]{\variance*{#1}}
+
+\DeclarePairedDelimiterXPP\variancedist[2]{\mathop{\mathrm{Var}}_{#1}}{\lbrack}{\rbrack}{}{\renewcommand\given{\nonscript\:\delimsize\vert\nonscript\:\mathopen{}}#2}
+\newcommand{\Variance}[2]{\variancedist*{#1}{#2}}
+
+\DeclarePairedDelimiterXPP\covariance[2]{\mathop{\mathrm{Cov}}}{(}{)}{}{#1,\mathopen{}#2}
+\newcommand{\Cov}[2]{\covariance*{#1}{#2}}
+
+
+% Linear Algebra, cemetry notation
+\newcommand{\Matrix}[1]{\begin{bmatrix}#1\end{bmatrix}}
+\newcommand{\Tr}[1]{\mathop{\mathrm{Tr}}\squarebrack{#1}}
+
+% norms
+\DeclarePairedDelimiterXPP{\nrm}[2]{}{\lVert}{\rVert}{\ensuremath{_{#1}}}{\ifblank{#2}{\:\cdot\:}{#2}}
+\newcommand{\norm}[2]{\nrm*{#1}{#2}}
+
+\newcommand{\twonorm}[1]{\norm{2}{#1}}
+\newcommand{\twonormsq}[1]{\norm{2}{#1}^2}
+\newcommand{\opnorm}[1]{\norm{\mathrm{op}}{#1}}
+\newcommand{\normF}[1]{\norm{\mathrm{F}}{#1}}
+
+
+% parentheses
+\DeclarePairedDelimiterX{\bracket}[3]{#1}{#2}{#3}
+
+\newcommand{\abs}[1]{\bracket*{\lvert}{\rvert}{#1}}
+\newcommand{\round}[1]{\bracket*{(}{)}{#1}}
+\newcommand{\curly}[1]{\bracket*{\lbrace}{\rbrace}{#1}}
+\newcommand{\squarebrack}[1]{\bracket*{\lbrack}{\rbrack}{#1}}
+
+% for convinience
+\newcommand{\comment}[1]{\qquad\round{\text{#1}}}
+\newcommand{\commentnewline}[1]{\qquad\qquad\qquad\qquad\qquad\qquad\comment{#1}\nonumber}
+\newcommand{\inv}[1]{\frac{1}{#1}}
+\newcommand{\sumi}[2]{\sum\limits_{i=#1}^{#2}}
+\newcommand{\sumj}[2]{\sum\limits_{j=#1}^{#2}}
+\newcommand{\sumk}[2]{\sum\limits_{k=#1}^{#2}}
