@@ -23,6 +23,69 @@ from utils import load_dataset, problem
 RNG = torch.Generator()
 RNG.manual_seed(446)
 
+class Linear(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.linear_0 = LinearLayer(2,2, generator=RNG)
+
+    def forward(self, inputs):
+        return self.linear_0(inputs)
+
+class SigNetwork(nn.Module):
+    def __init__(self, hidden_size):
+        super().__init__()
+        self.linear_0 = LinearLayer(2, hidden_size, generator=RNG)
+        self.linear_1 = LinearLayer(hidden_size, 2, generator=RNG)
+
+    def forward(self, inputs):
+        sig = SigmoidLayer()
+        x = self.linear_0(inputs)
+        x = sig(x)
+        return self.linear_1(x)
+
+class ReLUNetwork(nn.Module):
+    def __init__(self, hidden_size):
+        super().__init__()
+        self.linear_0 = LinearLayer(2, hidden_size, generator=RNG)
+        self.linear_1 = LinearLayer(hidden_size, 2, generator=RNG)
+
+    def forward(self, inputs):
+        relu = ReLULayer()
+        x = self.linear_0(inputs)
+        x = relu.forward(x)
+        return self.linear_1(x)
+
+class SigReLUNetwork(nn.Module):
+    def __init__(self, hidden_size0, hidden_size1):
+        super().__init__()
+        self.linear_0 = LinearLayer(2, hidden_size0, generator=RNG)
+        self.linear_1 = LinearLayer(hidden_size0, hidden_size1, generator=RNG)
+        self.linear_2 = LinearLayer(hidden_size1, 2, generator=RNG)
+
+    def forward(self, inputs):
+        sig = SigmoidLayer()
+        relu = ReLULayer()
+        x = self.linear_0(inputs)
+        x = sig(x)
+        x = self.linear_1(x)
+        x = relu(x)
+        return self.linear_2(x)
+
+class ReLUSigNetwork(nn.Module):
+    def __init__(self, hidden_size0, hidden_size1):
+        super().__init__()
+        self.linear_0 = LinearLayer(2, hidden_size0, generator=RNG)
+        self.linear_1 = LinearLayer(hidden_size0, hidden_size1, generator=RNG)
+        self.linear_2 = LinearLayer(hidden_size1, 2, generator=RNG)
+
+    def forward(self, inputs):
+        sig = SigmoidLayer()
+        relu = ReLULayer()
+        x = self.linear_0(inputs)
+        x = relu(x)
+        x = self.linear_1(x)
+        x = sig(x)
+        return self.linear_2(x)
 
 @problem.tag("hw3-A")
 def accuracy_score(model: nn.Module, dataloader: DataLoader) -> float:
@@ -45,12 +108,20 @@ def accuracy_score(model: nn.Module, dataloader: DataLoader) -> float:
         - This is similar to CrossEntropy accuracy_score function,
             but there will be differences due to slightly different targets in dataloaders.
     """
-    raise NotImplementedError("Your Code Goes Here")
+    accuracy = 0
+    for batch in dataloader:
+        data, labels = batch
+        data, labels = data, labels
+        y_hat = model(data)
+        y_pred = torch.argmax(y_hat,1)
+        y_labels = torch.argmax(labels,1)
+        accuracy += torch.sum(y_pred==y_labels).item()
+    return accuracy/len(dataloader.dataset)
 
 
 @problem.tag("hw3-A")
 def mse_parameter_search(
-    dataloader_train: DataLoader, dataloader_val: DataLoader
+    dataloader_train: DataLoader, dataloader_val: DataLoader, epochs=100
 ) -> Dict[str, Any]:
     """
     Main subroutine of the MSE problem.
@@ -80,7 +151,39 @@ def mse_parameter_search(
                 }
             }
     """
-    raise NotImplementedError("Your Code Goes Here")
+    model_dict ={}
+
+    # Linear
+    model = Linear()
+    loss = MSELossLayer()
+    train_dict = train(dataloader_train, model=model, criterion=loss, optimizer=SGDOptimizer, val_loader=dataloader_val)
+    model_dict["linear"] = {"train":train_dict["train"], "val":train_dict["val"], "model":model}
+
+    # one hidden layer, sigmoid
+    model = SigNetwork(2)
+    loss = MSELossLayer()
+    train_dict = train(dataloader_train, model=model, criterion=loss, optimizer=SGDOptimizer, val_loader=dataloader_val)
+    model_dict["hidden1_sig"] = {"train":train_dict["train"], "val":train_dict["val"], "model":model}
+
+    # one hidden layer, ReLU
+    model = ReLUNetwork(2)
+    loss = MSELossLayer()
+    train_dict = train(dataloader_train, model=model, criterion=loss, optimizer=SGDOptimizer, val_loader=dataloader_val)
+    model_dict["hidden1_ReLU"] = {"train":train_dict["train"], "val":train_dict["val"], "model":model}
+
+    # two hidden layer, Sig then ReLU
+    model = SigReLUNetwork(2,2)
+    loss = MSELossLayer()
+    train_dict = train(dataloader_train, model=model, criterion=loss, optimizer=SGDOptimizer, val_loader=dataloader_val)
+    model_dict["hidden2_Sig_ReLU"] = {"train":train_dict["train"], "val":train_dict["val"], "model":model}
+
+    # two hidden layer, ReLU then Sig
+    model = ReLUSigNetwork(2,2)
+    loss = MSELossLayer()
+    train_dict = train(dataloader_train, model=model, criterion=loss, optimizer=SGDOptimizer, val_loader=dataloader_val)
+    model_dict["hidden2_ReLU_Sig"] = {"train":train_dict["train"], "val":train_dict["val"], "model":model}
+
+    return model_dict
 
 
 @problem.tag("hw3-A", start_line=21)
@@ -120,7 +223,33 @@ def main():
         ),
         batch_size=32,
         shuffle=False,
-    raise NotImplementedError("Your Code Goes Here")
+    )
+
+    mse_dict = mse_parameter_search(mse_dataloader_train, mse_dataloader_val)
+
+    mins = {}
+    for key in mse_dict:
+        mins[key] = (np.min(mse_dict[key]["val"]))
+    print(mins)
+    ind_min = np.argmin(list(mins.values()))
+    best_model = list(mins.keys())[ind_min]
+    print("best model", best_model)
+    print("Accuracy:", accuracy_score(mse_dict[best_model]["model"], mse_dataloader_test))
+
+    plot_model_guesses(mse_dataloader_test, mse_dict[best_model]["model"], title="MSE "+best_model)
+
+    plt.figure(figsize=(7,5))
+    colors = ["C0","C1","C2","C3","C4","C5"]
+    i = 0
+    for key in mse_dict:
+        plt.plot(range(100), mse_dict[key]["train"], "-", color=colors[i], label=key+" training loss")
+        plt.plot(range(100), mse_dict[key]["val"], "--", color=colors[i], label=key+" testing loss")
+        i +=1
+    plt.xlabel("epochs")
+    plt.ylabel("loss")
+    plt.title("MSE")
+    plt.legend()
+    plt.show()
 
 
 def to_one_hot(a: np.ndarray) -> np.ndarray:

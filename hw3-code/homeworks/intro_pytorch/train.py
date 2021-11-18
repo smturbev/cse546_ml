@@ -48,7 +48,38 @@ def train(
             You might find some examples/tutorials useful.
             Also make sure to check out torch.no_grad function. It might be useful!
     """
-    raise NotImplementedError("Your Code Goes Here")
+    train_list = []
+    val_list = []
+    lr = 0.005
+    # initialize val_loader param if None to an empty list
+    # if val_loader is None:
+    #     train_hist['val']=[]
+    opt = optimizer(model.parameters(), lr)
+    for i in range(epochs):
+        loss_epoch = 0
+        for batch in train_loader:
+            data, labels = batch
+            data, labels = data, labels
+            y_hat = model(data)
+            loss = criterion(y_hat, labels)
+            loss_epoch += loss.item()
+            opt.zero_grad()
+            loss.backward()
+            opt.step()
+        train_list.append(loss_epoch/len(train_loader))
+        if val_loader is not None:
+            loss_epoch_val = 0
+            for batch_val in val_loader:
+                data_val, labels_val = batch_val
+                data_val, labels_val = data_val, labels_val
+                y_hat_val = model(data_val)
+                loss_val = criterion(y_hat_val, labels_val)
+                loss_epoch_val += loss_val.item()
+                opt.zero_grad()
+                loss_val.backward()
+                opt.step()
+            val_list.append(loss_epoch_val/len(val_loader))
+    return {"train":train_list, "val":val_list}
 
 
 def plot_model_guesses(

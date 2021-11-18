@@ -24,4 +24,4 @@ class SigmoidLayer(nn.Module):
                 YOU CAN however use other aliases of sigmoid function in PyTorch if you are able to find them in docs.
             - Make use of pytorch documentation: https://pytorch.org/docs/stable/index.html
         """
-        raise NotImplementedError("Your Code Goes Here")
+        return 1 / (1 + torch.exp(-x))

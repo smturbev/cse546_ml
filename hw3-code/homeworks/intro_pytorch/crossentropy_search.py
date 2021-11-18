@@ -22,6 +22,76 @@ from utils import load_dataset, problem
 RNG = torch.Generator()
 RNG.manual_seed(446)
 
+class Linear(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.linear_0 = LinearLayer(2,2,generator=RNG)
+
+    def forward(self, inputs):
+        softmax = SoftmaxLayer()
+        x = self.linear_0(inputs)
+        return softmax(x)
+
+class SigNetwork(nn.Module):
+    def __init__(self, hidden_size):
+        super().__init__()
+        self.linear_0 = LinearLayer(2, hidden_size, generator=RNG)
+        self.linear_1 = LinearLayer(hidden_size, 2, generator=RNG)
+
+    def forward(self, inputs):
+        sig = SigmoidLayer()
+        softmax = SoftmaxLayer()
+        x = self.linear_0(inputs)
+        x = sig(x)
+        return softmax(self.linear_1(x))
+
+class ReLUNetwork(nn.Module):
+    def __init__(self, hidden_size):
+        super().__init__()
+        self.linear_0 = LinearLayer(2, hidden_size, generator=RNG)
+        self.linear_1 = LinearLayer(hidden_size, 2, generator=RNG)
+
+    def forward(self, inputs):
+        relu = ReLULayer()
+        softmax = SoftmaxLayer()
+        x = self.linear_0(inputs)
+        x = relu.forward(x)
+        return softmax(self.linear_1(x))
+
+class SigReLUNetwork(nn.Module):
+    def __init__(self, hidden_size0, hidden_size1):
+        super().__init__()
+        self.linear_0 = LinearLayer(2, hidden_size0, generator=RNG)
+        self.linear_1 = LinearLayer(hidden_size0, hidden_size1, generator=RNG)
+        self.linear_2 = LinearLayer(hidden_size1, 2, generator=RNG)
+
+    def forward(self, inputs):
+        sig = SigmoidLayer()
+        relu = ReLULayer()
+        softmax = SoftmaxLayer()
+        x = self.linear_0(inputs)
+        x = sig(x)
+        x = self.linear_1(x)
+        x = relu(x)
+        return softmax(self.linear_2(x))
+
+class ReLUSigNetwork(nn.Module):
+    def __init__(self, hidden_size0, hidden_size1):
+        super().__init__()
+        self.linear_0 = LinearLayer(2, hidden_size0, generator=RNG)
+        self.linear_1 = LinearLayer(hidden_size0, hidden_size1, generator=RNG)
+        self.linear_2 = LinearLayer(hidden_size1, 2, generator=RNG)
+
+    def forward(self, inputs):
+        sig = SigmoidLayer()
+        relu = ReLULayer()
+        softmax = SoftmaxLayer()
+        x = self.linear_0(inputs)
+        x = relu(x)
+        x = self.linear_1(x)
+        x = sig(x)
+        return softmax(self.linear_2(x))
+
 
 @problem.tag("hw3-A")
 def crossentropy_parameter_search(
@@ -56,7 +126,40 @@ def crossentropy_parameter_search(
                 }
             }
     """
-    raise NotImplementedError("Your Code Goes Here")
+    model_dict ={}
+
+    # Linear
+    model = Linear()
+    loss = CrossEntropyLossLayer()
+    train_dict = train(dataloader_train, model=model, criterion=loss, optimizer=SGDOptimizer, val_loader=dataloader_val)
+    model_dict["linear"] = {"train":train_dict["train"], "val":train_dict["val"], "model":model}
+
+    # one hidden layer, sigmoid
+    model = SigNetwork(2)
+    loss = CrossEntropyLossLayer()
+    train_dict = train(dataloader_train, model=model, criterion=loss, optimizer=SGDOptimizer, val_loader=dataloader_val)
+    model_dict["hidden1_sig"] = {"train":train_dict["train"], "val":train_dict["val"], "model":model}
+
+    # one hidden layer, ReLU
+    model = ReLUNetwork(2)
+    loss = CrossEntropyLossLayer()
+    train_dict = train(dataloader_train, model=model, criterion=loss, optimizer=SGDOptimizer, val_loader=dataloader_val)
+    model_dict["hidden1_ReLU"] = {"train":train_dict["train"], "val":train_dict["val"], "model":model}
+
+    # two hidden layer, Sig then ReLU
+    model = SigReLUNetwork(2,2)
+    loss = CrossEntropyLossLayer()
+    train_dict = train(dataloader_train, model=model, criterion=loss, optimizer=SGDOptimizer, val_loader=dataloader_val)
+    model_dict["hidden2_Sig_ReLU"] = {"train":train_dict["train"], "val":train_dict["val"], "model":model}
+
+    # two hidden layer, ReLU then Sig
+    model = ReLUSigNetwork(2,2)
+    loss = CrossEntropyLossLayer()
+    train_dict = train(dataloader_train, model=model, criterion=loss, optimizer=SGDOptimizer, val_loader=dataloader_val)
+    model_dict["hidden2_ReLU_Sig"] = {"train":train_dict["train"], "val":train_dict["val"], "model":model}
+
+    return model_dict
+
 
 
 @problem.tag("hw3-A")
@@ -79,7 +182,14 @@ def accuracy_score(model, dataloader) -> float:
         - This is similar to MSE accuracy_score function,
             but there will be differences due to slightly different targets in dataloaders.
     """
-    raise NotImplementedError("Your Code Goes Here")
+    accuracy = 0
+    for batch in dataloader:
+        data, labels = batch
+        data, labels = data, labels
+        y_hat = model(data)
+        y_pred = torch.argmax(y_hat,1)
+        accuracy += torch.sum(y_pred==labels).item()
+    return accuracy/len(dataloader.dataset)
 
 
 @problem.tag("hw3-A", start_line=21)
@@ -119,7 +229,31 @@ def main():
 
     ce_configs = crossentropy_parameter_search(ce_dataloader_train, ce_dataloader_val)
 
-    raise NotImplementedError("Your Code Goes Here")
+    mins = {}
+    for key in ce_configs:
+        mins[key] = (np.min(ce_configs[key]["val"]))
+    print(mins)
+    ind_min = np.argmin(list(mins.values()))
+    best_model = list(mins.keys())[ind_min]
+    print("best model", best_model)
+    print("Accuracy:",accuracy_score(ce_configs[best_model]["model"], ce_dataloader_test))
+
+    plot_model_guesses(ce_dataloader_test, ce_configs[best_model]["model"], title="CE - "+best_model)
+
+    plt.figure(figsize=(7,5))
+    colors = ["C0","C1","C2","C3","C4","C5"]
+    i = 0
+    for key in ce_configs:
+        plt.plot(range(100), ce_configs[key]["train"], "-", color=colors[i], label=key+" training loss")
+        plt.plot(range(100), ce_configs[key]["val"], "--", color=colors[i], label=key+" testing loss")
+        i +=1
+    plt.xlabel("epochs")
+    plt.ylabel("loss")
+    plt.title("Cross Entropy")
+    plt.legend()
+    plt.show()
+
+
 
 
 if __name__ == "__main__":
