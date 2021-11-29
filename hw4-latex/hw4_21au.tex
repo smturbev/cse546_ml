@@ -1,0 +1,433 @@
+\documentclass{article}
+\usepackage{import}
+\subimport*{./}{macro}
+
+\usepackage{import}
+\usepackage[ruled]{algorithm2e}
+\usepackage[shortlabels]{enumitem}
+
+\setlength\parindent{0px}
+
+\begin{document}
+\setcounter{aprob}{0}
+\setcounter{bprob}{0}
+\title{Homework \#4}
+\author{
+    \normalsize{CSE 446/546: Machine Learning}\\
+    \normalsize{Profs. Jamie Morgenstern and Simon Du}\\
+    \normalsize{Due: \textbf{Wednesday} December 8, 2021 11:59pm}\\
+    \normalsize{\textbf{A:} 106 points, \textbf{B:} 50 points}
+}
+\date{{}}
+\maketitle
+
+\noindent Please review all homework guidance posted on the website before submitting to GradeScope. Reminders:
+\begin{itemize}
+    \item Make sure to read the ``What to Submit'' section following each question and include all items.
+    \item Please provide succinct answers and supporting reasoning for each question. Similarly, when discussing experimental results, concisely create tables and/or figures when appropriate to organize the experimental results. All explanations, tables, and figures for any particular part of a question must be grouped together. 
+    \item For every problem involving generating plots, please include the plots as part of your PDF submission.
+    \item When submitting to Gradescope, please link each question from the homework in Gradescope to the location of its answer in your homework PDF. Failure to do so may result in deductions of up to \points{5}. For instructions, see \url{https://www.gradescope.com/get_started#student-submission}.
+    \item Please recall that B problems, indicated in \boxed{\textrm{boxed text}}, are only graded for 546 students, and that they will be weighted at most 0.2 of your final GPA (see the course website for details). In Gradescope, there is a place to submit solutions to A and B problems separately. You are welcome to create a single PDF that contains answers to both and submit the same PDF twice, but associate the answers with the individual questions in Gradescope. 
+    \item If you collaborate on this homework with others, you must indicate who you worked with on your homework. Failure to do so may result in accusations of plagiarism.
+    \item For every problem involving code, please submit your code to the separate assignment on Gradescope created for code. Not submitting all code files will lead to a deduction of \points{1}.
+    \item Please indicate your final answer to each question by placing a box around the main result(s). To do this in \LaTeX, one option is using the \texttt{boxed} command.
+    \item You may choose \textbf{only one \textcolor{blue}{BLUE} problem from \textcolor{blue}{Image Classification on CIFAR-10} and \textcolor{blue}{Text classification on SST-2}} to complete (please do not turn in both).
+\end{itemize}
+
+Not adhering to these reminders may result in point deductions. \\
+
+\textcolor{red}{\textbf{Changelog:}}
+
+\begin{itemize}
+    \item \textbf{Date: 11/28} Updated \textt{reconstruction\_error} test in PCA.
+    \item \textbf{Date: 11/28} Removed square from k-means objective function.
+    \item \textbf{Date: 11/28} Added colab notebook for B1 problem.
+\end{itemize}
+
+\clearpage{}
+
+
+% Start of Problems:
+
+\setcounter{aprob}{0}
+ 
+\section*{Conceptual Questions}
+\begin{aprob}  The answers to these questions should be answerable without referring to external materials. Briefly justify your answers with a few words.
+    \begin{enumerate}
+      \item \points{2} True or False: Given a data matrix $X \in R^{n \times d}$ where $d$ is much smaller than $n$ and $k = \textrm{rank}(X)$, if we project our data onto a $k$ dimensional subspace using PCA, our projection will have zero reconstruction error (in other words, we find a perfect representation of our data, with no information loss).
+      \item \points{2} True or False: Suppose that an $n \times n$ matrix $X$ has a singular value decomposition of $USV^{\top}$, where $S$ is a diagonal $n \times n$ matrix. Then, the rows of $V$ are equal to the eigenvectors of $X^{\top}X$.
+      \item \points{2} True or False: choosing $k$ to minimize the $k$-means objective (see Equation \eqref{eq:kmeans_obj} below) is a good way to find meaningful clusters.
+    	\item \points{2} True or False: The singular value decomposition of a matrix is unique. 
+    	\item \points{2} True or False: The rank of a square matrix equals the number of its nonzero eigenvalues. 
+      \item \points{2} True or False: Autoencoders, where the encoder and decoder functions are both neural networks with nonlinear activations, can capture more variance of the data in its encoded representation than  PCA using the same number of dimensions.
+    \end{enumerate}
+
+    \subsection*{What to Submit:}
+    \begin{itemize}
+        \item \textbf{Parts a-f:} 1-2 sentence explanation containing your answer.
+    \end{itemize}
+
+\end{aprob}
+\pagebreak
+
+\clearpage
+\section*{Think before you train}
+\begin{aprob} \textbf{The first part of this problem (parts a, b)} explores how you would apply machine learning theory and techniques to real-world problems. There are two scenarios detailing a setting, a dataset, and a specific result we hope to achieve. Your job is to describe how you would handle each of the below scenarios with the tools we’ve learned in this class. Your response should include
+\begin{enumerate}[label=(\arabic*),topsep=0.2em,itemsep=-0.2em]
+    \item any pre-processing steps you would take (i.e., data acquisition and processing),
+    \item the specific machine learning pipeline you would use (i.e., algorithms and techniques learned in this class),
+    \item how your setup acknowledges the constraints and achieves the desired result.
+\end{enumerate}
+You should also aim to leverage some of the theory we have covered in this class. Some things to consider may be: the nature of the data (i.e., \textit{How hard is it to learn? Do we need more data? Are the data sources good?}), the effectiveness of the pipeline (i.e., \textit{How strong is the model when properly trained and tuned?}), and the time needed to effectively perform the pipeline.
+
+% Because of the open-ended nature of the question, any thoroughly written responses will receive full credit.
+
+\begin{enumerate}
+    \item \points{5} \textbf{Scenario 1: Disease Susceptibility Predictor}
+\begin{itemize}
+    \item \underline{Setting}: You are tasked by a research institute to create an algorithm that learns the factors that contribute most to acquiring a specific disease.
+    \item \underline{Dataset}: A rich dataset of personal demographic information, location information, risk factors, and whether a person has the disease or not.
+    \item \underline{Result}: The company wants a system that can determine how susceptible someone is to this disease when they enter in personal information. The pipeline should take limited amount of personal data from a new user and infer more detailed metrics about the person.
+\end{itemize}
+\item \points{5} \textbf{Scenario 2: Social Media App Facial Recognition Technology}
+\begin{itemize}
+    \item \underline{Setting}: You are tasked with developing a machine learning pipeline that can quickly map someone’s face for the application of filters (i.e., Snapchat, Instagram).
+    \item \underline{Dataset}: A set of face images compiled from the company’s employees and their families.
+    \item  \underline{Result}: The company wants an algorithm that can quickly identify the key features of a person’s face to apply a filter. (\textbf{Note:} Do not worry about describing the actual filter application).
+\end{itemize}
+\end{enumerate}
+
+\textbf{The second part of this problem (parts c, d)} focuses on exploring possible shortcomings of these models, and what real-world implications might follow from ignoring these issues.
+
+\begin{enumerate}
+\setcounter{enumi}{2}
+\item \points{5} Recall in Homework 2 we trained models to predict crime rates using various features. It is important to note that \textbf{datasets describing crime have various shortcomings in describing the entire landscape of illegal behavior in a city, and that these shortcomings often fall disproportionately on minority communities}. Some of these shortcomings include that crimes are reported at different rates in different neighborhoods, that police respond differently to the same crime reported or observed in different neighborhoods, and that police spend more time patrolling in some neighborhoods than others. What real-world implications might follow from ignoring these issues?
+
+\item \points{5} Pick one of either Scenario 1 or Scenario 2 (in parts a and b). Briefly describe (1) some potential shortcomings of your training process that may result in your algorithm having different accuracy on different populations, and (2) how you may modify your procedure to address these shortcomings.
+
+% \item \points{5} \textbf{Malware Detection:}
+% \begin{itemize}
+%     \item Setting: You are tasked by a major tech company to create a service that ingests malware metadata and provides accurate assessments as to whether a new file is malicious or not.
+%     \item Dataset: A set of malware file metadata from users worldwide describing all attributes of offending files including its contents, publisher, and attributes of the resultant activity.
+%     \item Result: The company wants an accurate, scalable solution to detect whether incoming files are malicious for users across the globe.
+% \end{itemize}
+\end{enumerate}
+
+\medskip
+
+\subsection*{What to Submit:}
+\begin{itemize}
+    \item For parts (a) and (b): One short paragraph (4-7) sentences for each of the described scenarios.
+    \item For part (c): One short paragraph on real-world implications that may follow from ignoring dataset issues.
+    \item For part (d): Clear and well-thought-out answers addressing (1) and (2) (as described in the problem). Two short paragraphs or one medium paragraph suffice. You only need to pick one of the scenarios to expand on here.
+\end{itemize}
+\end{aprob}
+
+\section*{Basics of SVD}
+\begin{aprob}
+  Given $X \in \R^{m \times n}$, recall that its Singular Value Decomposition (SVD) gives us a factorization of a matrix $X = U \Sigma V^\top$ such that $U \in \R^{m \times m}, V^\top \in \R^{n \times n}$ are orthogonal matrices and $\Sigma \in \R^{m \times n}$ is a diagonal matrix representing the singular values of $X$.
+  Show the following.
+  \begin{enumerate}
+    \item \points{3} Let $\widehat{w}$ be the solution to the regression problem $\min_{w} \|Xw - y\|_2^2$. Let $\widehat{w}_R$ be the solution to the ridge regression problem $\min_w \|X w - y\|_2^2 + \lambda \|w\|_2^2$. Let $X = U \Sigma V^\top$ be a singular value decomposition of $X$. Using this decomposition, explain why the solution $\widehat{w}_R$ to the ridge regression problem ``shrinks'' as compared to the solution $\widehat{w}$ of the standard regression problem. 
+    \item \points{3} Let $U \in \R^{n\times n}$ be a matrix with singular values all equal to one. Show that $UU^\top = U^\top U = I$.
+    \item \points{3} Now use the above result to show that $U$ preserves Euclidean norms. In other words, $\|U x\|_2 = \|x\|_2$ for any $x\in \R^n$.   
+  \end{enumerate}
+  
+  \subsection*{What to Submit:}
+    \begin{itemize}
+        \item \textbf{For part (a):} An explanation either in English or math, that points out exactly where the difference is
+between regularized and non-regularized versions of linear regression.
+        \item \textbf{For parts (b, c):} A derivation or proof.
+    \end{itemize}
+  
+\end{aprob}
+
+\section*{$k$-means clustering}
+
+\begin{aprob}
+Given a dataset $\bx_1,..., \bx_n \in \R^{d}$ and an integer $1 \leq k \leq n$, recall the following $k$-means objective function
+\begin{align}
+    \min_{\pi_1, ..., \pi_k} \sum_{i=1}^{k} \sum_{j \in \pi_i} \norm{2}{ \bx_j - \mu_{i} } \ , \quad \mu_i = \frac{1}{|\pi_i|} \sum_{j \in \pi_i} \bx_j \ . \label{eq:kmeans_obj}
+\end{align}
+Above, $\{\pi_i\}_{i=1}^{k}$ is a partition of $\{1, 2, ..., n\}$. The objective \eqref{eq:kmeans_obj} is NP-hard\footnote{
+To be more precise, it is both NP-hard in $d$ when $k=2$ and $k$ when $d=2$. See the references on the wikipedia page for $k$-means for more details.} to find a global minimizer of. Nevertheless the commonly-used algorithm we discussed in lecture (Lloyd's algorithm), typically works well in practice.
+
+\medskip
+
+
+\begin{enumerate}
+    \item \points{5} Implement Lloyd's algorithm for solving the $k$-means objective \eqref{eq:kmeans_obj}. Do not use any off-the-shelf implementations, such as those found in \texttt{scikit-learn}. Include your code in your submission.
+    
+    \item \points{5} Run the algorithm on the \emph{training} dataset of MNIST with $k=10$, plotting the objective function \eqref{eq:kmeans_obj} as a function of the iteration number. Visualize (and include in your report) the cluster centers as a $28\times 28$ image.
+
+    \item \points{5} For $k=\{2, 4, 8, 16, 32, 64\}$ run the algorithm on the \emph{training} dataset to obtain centers $\{\mu_{i}\}_{i=1}^k$. If $\{(\bx_i,y_i)\}_{i=1}^n$ and $\{(\bx_i',y_i')\}_{i=1}^m$ denote the training and test sets, respectively, plot the training error $\frac{1}{n} \sum_{i=1}^n \min_{j=1,\dots,k} \| \mu_j - \bx_i \|_2^2$ and test error $\frac{1}{m} \sum_{i=1}^m \min_{j=1,\dots,k} \| \mu_j - \bx_i' \|_2^2$ as a function of $k$ on the same plot.
+\end{enumerate}
+ \subsection*{What to Submit:}
+    \begin{itemize}
+        \item \textbf{For part (a):} Llyod’s algorithm code
+        \item \textbf{For part (b):} Plot of objective function. 10 images of cluster centers.
+        \item \textbf{For part (c):} Plot of training and test error as function of k.
+        \item Code for parts a-c
+    \end{itemize}
+
+
+\end{aprob}
+
+\section*{PCA}
+\begin{aprob}
+Let's do PCA on MNIST dataset and reconstruct the digits in the dimensionality-reduced PCA basis. You will actually compute your PCA basis using the training dataset only, and evaluate the quality of the basis on the test set, similar to the k-means reconstructions of above. 
+We have $n_{train}=50,000$ training examples of size $28 \times 28$. Begin by flattening each example to a vector to obtain $X_{train} \in \mathbb{R}^{50,000 \times d}$ and $X_{test} \in \mathbb{R}^{10,000 \times d}$ for $d:= 784$. \\
+
+Let $\mu \in \mathbb{R}^{d}$ denote the average of the training examples in $X_{train}$, i.e., $\mu = \frac{1}{n_{train}} X_{train}^\top \mathbf{1}^\top$. Now let $\Sigma =  (X_{train} - \mathbf{1} \mu^\top)^\top (X_{train} - \mathbf{1} \mu^\top)/50000$ denote the sample covariance matrix of the training examples, and let $\Sigma = UDU^T$ denote the eigenvalue decomposition of $\Sigma$.
+\begin{enumerate}
+\item \points{2}
+    If $\lambda_i$ denotes the $i$th largest eigenvalue of $\Sigma$, what are the eigenvalues $\lambda_1$, $\lambda_2$, $\lambda_{10}$, $\lambda_{30}$, and $\lambda_{50}$? What is the sum of eigenvalues $\sum_{i=1}^d{\lambda_i}$?
+ 
+\item \points{5}
+    Let $x \in \mathbb{R}^d$ and $k \in 1,2,\dots,d$. Write a formula for the rank-$k$ PCA approximation of $x$.
+ 
+\item \points{5} Using this approximation, plot the reconstruction error from $k=1$ to $100$ (the $X$-axis is $k$ and the $Y$-axis is the mean-squared error reconstruction error) on the training set and the test set (using the $\mu$ and the basis learned from the training set). 
+    On a separate plot, plot  $1-\frac{\sum_{i=1}^{k}{\lambda_i}}{\sum_{i=1}^{d}{\lambda_i}}$ from $k=1$ to $100$.
+    
+\item \points{3}
+    Now let us get a sense of what the top PCA directions are capturing. Display the first $10$ eigenvectors as images, and provide a brief interpretation of what you think they capture.
+    
+\item \points{3}
+    Finally, visualize a set of reconstructed digits from the training set for different values of $k$. In particular provide the reconstructions for digits $2,6,7$ with values $k = 5, 15, 40, 100$ (just choose an image from each digit arbitrarily). Show the original image side-by-side with its reconstruction. Provide a brief interpretation, in terms of your perceptions of the quality of these reconstructions and the dimensionality you used.
+    
+\end{enumerate}
+ \subsection*{What to Submit:}
+    \begin{itemize}
+
+        \item \textbf{For part (a):} Eigenvalues λ1, λ2, λ10, λ30, and λ50 and the sum. At least 6 leading digits.
+        \item \textbf{For part (b):} The Formula. If you are defining new variables/matrices make sure their definition is stated
+        clearly.
+        \item \textbf{For part (c):} Plot containing reconstruction error on train and test sets. Plot of $1-\frac{\sum_{i=1}^{k}{\lambda_i}}{\sum_{i=1}^{d}{\lambda_i}}$
+        \item \textbf{For part (d):} 10 eigenvectors as images.
+        \item \textbf{For part (e):} 15 total images, including 3 original and 12 reconstructed ones. Each reconstructed image
+        corresponds to a certain digit (2, 6 or 7) and k value (5, 15, 40 or 100).
+        \item Code for parts c-e
+    \end{itemize}
+\end{aprob}
+
+
+\section*{Unsupervised Learning with Autoencoders}
+\begin{aprob}
+In this exercise, we will train two simple autoencoders to perform
+dimensionality reduction on MNIST. As discussed in lecture, autoencoders are a
+long-studied neural network architecture comprised of an encoder component to
+summarize the latent features of input data and a decoder component to try and
+reconstruct the original data from the latent features.
+
+\subsubsection*{Weight Initialization and PyTorch}
+Last assignment, we had you refrain from using \texttt{torch.nn} modules. For
+this assignment, we recommend using \texttt{nn.Linear} for your linear layers.
+You will not need to initialize the weights yourself; the default
+He/Kaiming uniform initialization in PyTorch will be sufficient for this problem. \emph{Hint: we also recommend using the \text{\texttt{nn.Sequential}} module to organize your
+network class and simplify the process of writing the forward pass. However, you may choose to organize your code however you'd like.}
+\subsubsection*{Training}
+Use \texttt{optim.Adam} for this question. Feel free to experiment with different learning rates, though you can use $5 \cdot 10^{-5}$ as mentioned in the code. Use mean
+squared error (\texttt{nn.MSELoss()} or \texttt{F.mse\_loss()}) for the loss function.
+
+\begin{enumerate}
+  \item \points{10} Use a network with a single linear layer. Let $W_{\text{e}} \in \mathbb{R}^{h \times d}$ and
+    $W_{\text{d}} \in \mathbb{R}^{d\times h}$. Given some $x \in \mathbb{R}^d$,
+    the forward pass is formulated as \[
+      \mathcal{F}_{1}(x) = W_{\text{d}} W_{\text{e}} x
+    .\]
+    Run experiments for $h \in \{ 32, 64, 128 \}$. For
+    each of the different $h$ values, report your final training error and visualize a
+    set of 10 reconstructed digits, side-by-side with the original image. \emph{Note:} we omit the bias term in the formulation
+    for notational convenience since \texttt{nn.Linear} learns bias
+    parameters alongside weight parameters by default.
+    
+  \item \points{10} Use a single-layer network with non-linearity. Let $W_{\text{e}} \in \mathbb{R}^{h \times d}$, $W_{\text{d}} \in \mathbb{R}^{d\times h}$, and activation $\sigma: \mathbb{R} \longmapsto \mathbb{R}$, where $\sigma$ is the ReLU function. Given some $x \in \mathbb{R}^d$,
+    the forward pass is formulated as 
+    \[
+      \mathcal{F}_{2}(x) = \sigma(W_{\text{d}} \sigma(W_{\text{e}} x))
+    .\] Report the same findings as asked for in part a (for $h \in \{ 32,64,128 \}$).
+  \item \points{5} Now, evaluate $\mathcal{F}_1(x)$ and $\mathcal{F}_2(x)$ (use $h=128$
+    here) on the test set. Provide the test reconstruction errors in a
+    table.
+  \item \points{5} In a few sentences, compare the quality of the reconstructions from these two autoencoders with those of PCA from problem A5. You may need to re-run your code for PCA using the ranks $k \in \{32, 64, 128\}$ to match the $h$ values used above.
+\end{enumerate}
+ \subsection*{What to Submit:}
+    \begin{itemize}
+
+        \item \textbf{For parts (a, b):} Final training error and set of 10 reconstructed images of digits, side-by-side with the
+original image (10 images for each h).
+        \item \textbf{For part (c):} Errors of networks from part a and b on testing set.
+        \item \textbf{For part (d):} 2-3 sentences on differences in quality of solutions between PCA and Autoencoders, with
+example images
+        \item Code for parts a-c
+    \end{itemize}
+
+\end{aprob}
+
+\section*{Administrative}
+\begin{aprob}
+\begin{enumerate}
+    \item \points{2} About how many hours did you spend on this homework? There is no right or wrong answer :)
+\end{enumerate}
+\end{aprob}
+
+\clearpage
+\section*{\textcolor{blue}{Image Classification on CIFAR-10}}
+\begin{bprob} In this problem we will explore different deep learning architectures for image classification on the CIFAR-10 dataset. Make sure that you are familiar with tensors, two-dimensional convolutions (\texttt{nn.Conv2d}) and fully-connected layers (\texttt{nn.Linear}), ReLU non-linearities (\texttt{F.relu}), pooling (\texttt{nn.MaxPool2d}), and tensor reshaping (\texttt{view}). \\
+
+A few preliminaries:
+\begin{itemize}
+  \item Each network $f$ maps an image $x^\text{in} \in \R^{32 \times 32 \times 3}$ (3 channels for RGB) to an output $f(x^\text{in}) = x^\text{out} \in \R^{10}$. The class label is predicted as $\arg\max_{i=0,1,\dots,9} x_{i}^\text{out}$. An error occurs if the predicted label differs from the true label for a given image. 
+  \item The network is trained via multiclass cross-entropy loss. % the same loss we used for multi-class logistic regression. Specifically, for an input image and label pair $(x^{in}, c)$ where $c \in \{0,1,\dots,9\}$, if the network's output layer is $x^{out} \in \R^{10}$, the loss is $-\log( \frac{\exp(x_c^{out})}{\sum_{c'=0}^9 \exp(x_{c'}^{out})})$.
+  %\item For computational efficiency reasons, this particular network considers \emph{mini-batches} of images per training step meaning the network actually maps $B=4$ images per feed-forward so that $\widetilde{x}^{in} \in {\R^{B \times 32 \times 32 \times 3}}$  and $\widetilde{x}^{out} \in \R^{B \times 10}$.
+  %This is ignored in the network descriptions below but it is something to be aware of. 
+%   \item The cross-entropy loss for a neural network is, in general, non-convex. 
+%   This means that the optimization method may converge to different \emph{local minima} based on different hyperparameters of the optimization procedure (e.g., stepsize). 
+%   Usually one can find a good setting for these hyperparameters by just observing the relative progress of training over the first epoch or two (how fast is it decreasing) but you are warned that early progress is not necessarily indicative of the final convergence value (you may converge quickly to a poor local minimum whereas a different step size could have poor early performance but converge to a better final value). 
+ 
+  \item Create a validation dataset by appropriately partitioning the train dataset. \emph{Hint}: look at the documentation for \texttt{torch.utils.data.random\_split}. Make sure to tune hyperparameters like network architecture and step size on the validation dataset. Do \textbf{NOT} validate your hyperparameters on the test dataset.
+  \item At the end of each epoch (one pass over the training data), compute and print the training and validation classification accuracy.
+  \item While one would usually train a network for hundreds of epochs to reach convergence and maximize accuracy, this can be prohibitively time-consuming, so feel free to train for just a dozen or so epochs. 
+\end{itemize}
+
+For parts (a)--(c), apply a hyperparameter tuning method (e.g. random search, grid search, etc.) using the validation set, report the hyperparameter configurations you evaluated and the best set of hyperparameters from this set, and plot the training and validation classification accuracy as a function of epochs. Produce a separate line or plot for each hyperparameter configuration evaluated (top 5 configurations is sufficient to keep the plots clean). Finally, evaluate your best set of hyperparameters on the test data and report the test accuracy. 
+
+\textbf{Note:} If you are attempting this problem and do not have access to GPU we highly recommend using Google Colab. You can copy \href{https://colab.research.google.com/drive/16CcFW4q3wJyym5yAl2qdn9uDXkn2MgHx?usp=sharing}{this notebook}, which will show how to enable/use GPU on that platform.
+
+\vspace{0.1in}
+Here are the network architectures you will construct and compare.
+\begin{enumerate}
+  \item \points{14} \textbf{Fully-connected output, 0 hidden layers (logistic regression):} this network has no hidden layers and linearly maps the input layer to the output layer. This can be written as 
+  \begin{align*}
+    x^\text{out} &= W \vect(x^\text{in}) +b
+  \end{align*} 
+  
+  where $x^\text{out} \in \R^{10}$, $x^\text{in} \in \R^{32 \times 32 \times 3}$, $W \in \R^{10 \times 3072}$, $b \in \R^{10}$ since $3072 = 32 \cdot 32 \cdot 3$. For a tensor $x \in \R^{a \times b \times c}$, we let $\vect(x) \in \R^{a b c}$ be the reshaped form of the tensor into a vector (in an arbitrary but consistent pattern). 
+  There is no required benchmark validation accuracy for this part.
+
+  \item \points{18} \textbf{Fully-connected output, 1 fully-connected hidden layer:} this network has one hidden layer denoted as $x^\text{hidden} \in \R^{M}$ where $M$ will be a hyperparameter you choose ($M$ could be in the hundreds). The nonlinearity applied to the hidden layer will be the \texttt{relu} ($\mathrm{relu}(x) = \max\{0,x\}$. This network can be written as
+  \begin{align*}
+    x^{out} &= W_2 \mathrm{relu}(W_1 \vect(x^{in}) +b_1) + b_2
+  \end{align*}
+  where $W_1 \in \R^{M \times 3072}$, $b_1 \in \R^M$, $W_2 \in \R^{10 \times M}$, $b_2 \in \R^{10}$.
+  Tune the different hyperparameters and train for a sufficient number of epochs to achieve a \emph{validation accuracy} of at least 50\%. Provide the hyperparameter configuration used to achieve this performance.
+  \item \points{18} \textbf{Convolutional layer with max-pool and fully-connected output:} for a convolutional layer $W_1$ with filters of size $k \times k \times 3$, and $M$ filters (reasonable choices are $M=100$, $k=5$), we have that $\mathrm{Conv2d}(x^\text{in}, W_1) \in \R^{(33-k) \times (33-k) \times M}$.
+  
+  \begin{itemize}
+      \item Each convolution will have its own offset applied to each of the output pixels of the convolution; we denote this as $\mathrm{Conv2d}(x^\text{in}, W) + b_1$ where $b_1$ is parameterized in $\R^M$. Apply a \texttt{relu} activation to the result of the convolutional layer. 
+      \item Next, use a max-pool of size $N \times N$ (a reasonable choice is $N=14$ to pool to $2 \times 2$ with $k=5$) we have that $\textrm{MaxPool}( \mathrm{relu}( \mathrm{Conv2d}(x^\text{in}, W_1)+b_1)) \in \R^{\lfloor\frac{33-k}{N}\rfloor \times \lfloor\frac{33-k}{N}\rfloor \times M}$.
+      \item We will then apply a fully-connected layer to the output to get a final network given as
+          \begin{align*}
+          x^{output} = W_2 \vect(\textrm{MaxPool}( \mathrm{relu}( \mathrm{Conv2d}(x^\text{input}, W_1)+b_1))) + b_2
+          \end{align*}
+    where $W_2 \in \R^{10 \times M (\lfloor\frac{33-k}{N}\rfloor)^2}$, $b_2 \in \R^{10}$.
+  \end{itemize}
+  
+  The parameters $M,k,N$ (in addition to the step size and momentum) are all hyperparameters, but you can choose a reasonable value. Tune the different hyperparameters (number of convolutional filters, filter sizes, dimensionality of the fully-connected layers, stepsize, etc.) and train for a sufficient number of epochs to achieve a \emph{validation accuracy} of at least 65\%. Provide the hyperparameter configuration used to achieve this performance.
+Make sure to save this model so that you can do the next part.
+  
+The number of hyperparameters to tune, combined with the slow training times, will hopefully give you a taste of how difficult it is to construct networks with good generalization performance. State-of-the-art networks can have dozens of layers, each with their own hyperparameters to tune. Additional hyperparameters you are welcome to play with if you are so inclined, include: changing the activation function, replace max-pool with average-pool, adding more convolutional or fully connected layers, and experimenting with batch normalization or dropout.
+\end{enumerate}
+\subsection*{What to Submit:}
+\begin{itemize}
+    \item Parts a-c: Code \textbf{in PDF} (in addition to code submission).
+    \item Part d: Loss and accuracy on both validation and training sets for each of 3 three different types of models. Also what parameters were used to achieve these values.
+    \item Part e: Few sentences on modification of architecture.
+    \item Code for parts a-d
+\end{itemize}
+\end{bprob}
+
+\clearpage
+\section*{\textcolor{blue}{Text classification on SST-2}}
+\begin{bprob}
+ The Stanford Sentiment Treebank (SST-2) is a dataset of movie reviews. Each review is annotated with a label indicating whether the sentiment of the review is
+positive or negative.  Below are some examples from the dataset. Note that often times the reviews are only partial
+sentences or even single words.
+
+\begin{center}
+\begin{tabular}{ l | c }
+Sequence & Sentiment\\
+\hline\\
+is one big , dumb action movie . & Negative \\ 
+perfectly executed and wonderfully sympathetic characters , & Positive \\
+until then there 's always these rehashes to feed to the younger generations & Negative\\
+is like nothing we westerners have seen before . & Positive
+\end{tabular}
+\end{center}
+
+In this problem you will use a Recurrent Neural Network (RNN) for classifying reviews as either Positive (1) or Negative (0).
+
+\subsubsection*{Using an RNN for binary classification}
+\begin{center}
+\includegraphics[scale=0.75]{rnn.png}
+\end{center}
+
+Above is a simplified visualization of the RNN you will be building. Each token of the input sequence (\textit{CSE}, \textit{446}, \dots) is 
+fed into the network sequentially. Note that in reality, we convert each token to some integer index. But training with discrete values
+does not work well, so we also "embed" the words in a high-dimensional continuous space. We already provided an \texttt{nn.Embedding} layer
+to you to do this. Each RNN cell (squares above) generates a hidden state $h_i$. We then feed the last hidden state into a simple
+fully-connected layer, which then produces a single prediction between $0$ and $1$.
+
+\subsubsection*{Setup}
+\begin{enumerate}[1.]
+    \item Update environment by running:
+    \begin{lstlisting}[basicstyle=\ttfamily\small]
+    conda env update -f environment.yaml
+    conda activate cse446
+    pip install -e .
+    \end{lstlisting}
+\end{enumerate}
+You only need to modify \texttt{problems.py}, however you are free to also modify the other two files. You only need to submit
+\texttt{problems.py}, but if you make changes to the other files you should also include them in your submission.
+\subsubsection*{Problems}
+\begin{enumerate}
+    \item \points{10} In Natural Language Processing (NLP), we usually have to deal with variable length data. In SST-2, each data point corresponds
+    to a review, and reviews often have different lengths. The issue is that to efficiently train a model with textual data, we need
+    to create batches of data that are fixed size matrices. In order to store a batch of sequences in a single
+    matrix, we add padding to shorter sequences so that each sequence has the same length. Given a list of $N$ sequences, we:
+    \begin{enumerate}[1.]
+        \item Find the length of the longest sequence in the batch, call it \texttt{max\_sequence\_length}
+        \item Append padding tokens to the end of each sequence so that each sequence has length
+        
+        \texttt{max\_sequence\_length}
+        \item Stack the sequences into a matrix of size \texttt{(N, max\_sequence\_length)}
+    \end{enumerate}
+    In this process, words are mapped to integer ids, so in the above process we actually store integers rather than strings. For the padding token, we simply use
+    id $0$. In the file \texttt{problems.py}, fill out \texttt{collate\_fn} to perform the above batching process. Details are provided in the comment of the function.
+    
+    \item \points{15}
+    Implement the constructor and forward method for \texttt{RNNBinaryClassificationModel}. You will use three different types of recurrent neural networks:
+    the vanilla RNN (\texttt{nn.RNN}), Long Short-Term Memory (\texttt{nn.LSTM}) and Gated Recurrent Units (\texttt{nn.GRU}). For the hidden size, use
+    $64$ (Usually this is a hyperparameter you need to tune). We have already provided you with the embedding layer to turn
+    token indices into continuous vectors of size $50$, but you will need a linear
+    layer to transform the last hidden state of the recurrent layer to a shape that can be interpreted as a label prediction.
+    
+    
+    \item \points{5}
+    Implement the \texttt{loss} method of \texttt{RNNBinaryClassificationModel}, which should compute the binary cross-entropy loss between the predictions and the target labels. Also implemented the \texttt{accuracy} method, which given the predictions and the target labels should return the accuracy.
+    
+    \item \points{15}
+    We have already provided all of the data loading, training and validation code for you. Choose appropriate parameters in \texttt{get\_parameters} function, by setting the constants:
+    
+    \texttt{TRAINING\_BATCH\_SIZE}, \texttt{NUM\_EPOCHS}, \texttt{LEARNING\_RATE}.
+    With a good learning rate, you shouldn't have to train for more than $16$ epochs.
+    Report your best validation loss and corresponding validation accuracy, corresponding training loss and training accuracy for each of the three types of recurrent neural networks.
+    
+    \item \points{5}
+    Currently we are only using the final hidden state of the RNN to classify the entire sequence as being either positive or negative
+    sentiment. But can we make use of the other hidden states?
+    Suppose you wanted to use the same architecture for a related task called tagging. For tagging, the goal is to predict a tag for each token
+    of the sequence. For instance, we might want predict the part of speech tag (verb, noun, adjective etc.) of each token. In a few sentences, describe how
+    you would modify the current architecture to predict a tag for each token.
+    
+\end{enumerate}
+
+\subsection*{What to Submit:}
+\begin{itemize}
+    \item Parts a-c: Plot of training and validation accuracy for each TOP 5 hyperparameter configurations evaluated. (10 lines total). If it took less than 5 hyperparameter configurations to pass performance threshold plot all hyperparameter configurations evaluated.
+    \item Parts a-c: Values of best performing hyperparameters, and accuracy of best models on test data.
+    \item Code
+\end{itemize}
+\end{bprob}
+
+\end{document}
