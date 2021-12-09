@@ -66,5 +66,5 @@ class TestKMeans(TestCase):
         expected = np.array([0, 0, 1, 1])
 
         actual = cluster_data(X, centers)
-        np.testing.assert_almost_equal(actual, expected, decimal=0)
+        np.testing.assert_almost_equal(actual, expected)
         set_score(1)

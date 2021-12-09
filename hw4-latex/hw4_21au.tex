@@ -1,10 +1,12 @@
 \documentclass{article}
-\usepackage{import}
-\subimport*{./}{macro}
 
-\usepackage{import}
+% \usepackage{import}
+% \subimport*{./}{macro}
+\input{macro}
+
+% \usepackage{import}
 \usepackage[ruled]{algorithm2e}
-\usepackage[shortlabels]{enumitem}
+% \usepackage[shortlabels]{enumitem}
 
 \setlength\parindent{0px}
 
@@ -21,42 +23,42 @@
 \date{{}}
 \maketitle
 
-\noindent Please review all homework guidance posted on the website before submitting to GradeScope. Reminders:
-\begin{itemize}
-    \item Make sure to read the ``What to Submit'' section following each question and include all items.
-    \item Please provide succinct answers and supporting reasoning for each question. Similarly, when discussing experimental results, concisely create tables and/or figures when appropriate to organize the experimental results. All explanations, tables, and figures for any particular part of a question must be grouped together. 
-    \item For every problem involving generating plots, please include the plots as part of your PDF submission.
-    \item When submitting to Gradescope, please link each question from the homework in Gradescope to the location of its answer in your homework PDF. Failure to do so may result in deductions of up to \points{5}. For instructions, see \url{https://www.gradescope.com/get_started#student-submission}.
-    \item Please recall that B problems, indicated in \boxed{\textrm{boxed text}}, are only graded for 546 students, and that they will be weighted at most 0.2 of your final GPA (see the course website for details). In Gradescope, there is a place to submit solutions to A and B problems separately. You are welcome to create a single PDF that contains answers to both and submit the same PDF twice, but associate the answers with the individual questions in Gradescope. 
-    \item If you collaborate on this homework with others, you must indicate who you worked with on your homework. Failure to do so may result in accusations of plagiarism.
-    \item For every problem involving code, please submit your code to the separate assignment on Gradescope created for code. Not submitting all code files will lead to a deduction of \points{1}.
-    \item Please indicate your final answer to each question by placing a box around the main result(s). To do this in \LaTeX, one option is using the \texttt{boxed} command.
-    \item You may choose \textbf{only one \textcolor{blue}{BLUE} problem from \textcolor{blue}{Image Classification on CIFAR-10} and \textcolor{blue}{Text classification on SST-2}} to complete (please do not turn in both).
-\end{itemize}
+% \noindent Please review all homework guidance posted on the website before submitting to GradeScope. Reminders:
+% \begin{itemize}
+%     \item Make sure to read the ``What to Submit'' section following each question and include all items.
+%     \item Please provide succinct answers and supporting reasoning for each question. Similarly, when discussing experimental results, concisely create tables and/or figures when appropriate to organize the experimental results. All explanations, tables, and figures for any particular part of a question must be grouped together.
+%     \item For every problem involving generating plots, please include the plots as part of your PDF submission.
+%     \item When submitting to Gradescope, please link each question from the homework in Gradescope to the location of its answer in your homework PDF. Failure to do so may result in deductions of up to \points{5}. For instructions, see \url{https://www.gradescope.com/get_started#student-submission}.
+%     \item Please recall that B problems, indicated in \boxed{\textrm{boxed text}}, are only graded for 546 students, and that they will be weighted at most 0.2 of your final GPA (see the course website for details). In Gradescope, there is a place to submit solutions to A and B problems separately. You are welcome to create a single PDF that contains answers to both and submit the same PDF twice, but associate the answers with the individual questions in Gradescope. 
+%     \item If you collaborate on this homework with others, you must indicate who you worked with on your homework. Failure to do so may result in accusations of plagiarism.
+%     \item For every problem involving code, please submit your code to the separate assignment on Gradescope created for code. Not submitting all code files will lead to a deduction of \points{1}.
+%     \item Please indicate your final answer to each question by placing a box around the main result(s). To do this in \LaTeX, one option is using the \texttt{boxed} command.
+%     \item You may choose \textbf{only one \textcolor{blue}{BLUE} problem from \textcolor{blue}{Image Classification on CIFAR-10} and \textcolor{blue}{Text classification on SST-2}} to complete (please do not turn in both).
+% \end{itemize}
 
-Not adhering to these reminders may result in point deductions. \\
+% Not adhering to these reminders may result in point deductions. \\
 
-\textcolor{red}{\textbf{Changelog:}}
+% \textcolor{red}{\textbf{Changelog:}}
 
-\begin{itemize}
-    \item \textbf{Date: 11/28} Updated \textt{reconstruction\_error} test in PCA.
-    \item \textbf{Date: 11/28} Removed square from k-means objective function.
-    \item \textbf{Date: 11/28} Added colab notebook for B1 problem.
-\end{itemize}
+% \begin{itemize}
+%     \item \textbf{Date: 11/28} Updated \textt{reconstruction\_error} test in PCA.
+%     \item \textbf{Date: 11/28} Removed square from k-means objective function.
+%     \item \textbf{Date: 11/28} Added colab notebook for B1 problem.
+% \end{itemize}
 
-\clearpage{}
+% \clearpage{}
 
 
 % Start of Problems:
 
 \setcounter{aprob}{0}
- 
+
 \section*{Conceptual Questions}
 \begin{aprob}  The answers to these questions should be answerable without referring to external materials. Briefly justify your answers with a few words.
     \begin{enumerate}
       \item \points{2} True or False: Given a data matrix $X \in R^{n \times d}$ where $d$ is much smaller than $n$ and $k = \textrm{rank}(X)$, if we project our data onto a $k$ dimensional subspace using PCA, our projection will have zero reconstruction error (in other words, we find a perfect representation of our data, with no information loss).
       \item \points{2} True or False: Suppose that an $n \times n$ matrix $X$ has a singular value decomposition of $USV^{\top}$, where $S$ is a diagonal $n \times n$ matrix. Then, the rows of $V$ are equal to the eigenvectors of $X^{\top}X$.
-      \item \points{2} True or False: choosing $k$ to minimize the $k$-means objective (see Equation \eqref{eq:kmeans_obj} below) is a good way to find meaningful clusters.
+      % \item \points{2} True or False: choosing $k$ to minimize the $k$-means objective (see Equation \eqref{eq:kmeans_obj} below) is a good way to find meaningful clusters.
     	\item \points{2} True or False: The singular value decomposition of a matrix is unique. 
     	\item \points{2} True or False: The rank of a square matrix equals the number of its nonzero eigenvalues. 
       \item \points{2} True or False: Autoencoders, where the encoder and decoder functions are both neural networks with nonlinear activations, can capture more variance of the data in its encoded representation than  PCA using the same number of dimensions.
@@ -142,6 +144,8 @@ between regularized and non-regularized versions of linear regression.
   
 \end{aprob}
 
+\newpage
+
 \section*{$k$-means clustering}
 
 \begin{aprob}
@@ -149,16 +153,16 @@ Given a dataset $\bx_1,..., \bx_n \in \R^{d}$ and an integer $1 \leq k \leq n$, 
 \begin{align}
     \min_{\pi_1, ..., \pi_k} \sum_{i=1}^{k} \sum_{j \in \pi_i} \norm{2}{ \bx_j - \mu_{i} } \ , \quad \mu_i = \frac{1}{|\pi_i|} \sum_{j \in \pi_i} \bx_j \ . \label{eq:kmeans_obj}
 \end{align}
-Above, $\{\pi_i\}_{i=1}^{k}$ is a partition of $\{1, 2, ..., n\}$. The objective \eqref{eq:kmeans_obj} is NP-hard\footnote{
-To be more precise, it is both NP-hard in $d$ when $k=2$ and $k$ when $d=2$. See the references on the wikipedia page for $k$-means for more details.} to find a global minimizer of. Nevertheless the commonly-used algorithm we discussed in lecture (Lloyd's algorithm), typically works well in practice.
+% Above, $\{\pi_i\}_{i=1}^{k}$ is a partition of $\{1, 2, ..., n\}$. The objective \eqref{eq:kmeans_obj} is NP-hard\footnote{
+% To be more precise, it is both NP-hard in $d$ when $k=2$ and $k$ when $d=2$. See the references on the wikipedia page for $k$-means for more details.} to find a global minimizer of. Nevertheless the commonly-used algorithm we discussed in lecture (Lloyd's algorithm), typically works well in practice.
 
 \medskip
 
 
 \begin{enumerate}
-    \item \points{5} Implement Lloyd's algorithm for solving the $k$-means objective \eqref{eq:kmeans_obj}. Do not use any off-the-shelf implementations, such as those found in \texttt{scikit-learn}. Include your code in your submission.
+    % \item \points{5} Implement Lloyd's algorithm for solving the $k$-means objective \eqref{eq:kmeans_obj}. Do not use any off-the-shelf implementations, such as those found in \texttt{scikit-learn}. Include your code in your submission.
     
-    \item \points{5} Run the algorithm on the \emph{training} dataset of MNIST with $k=10$, plotting the objective function \eqref{eq:kmeans_obj} as a function of the iteration number. Visualize (and include in your report) the cluster centers as a $28\times 28$ image.
+    % \item \points{5} Run the algorithm on the \emph{training} dataset of MNIST with $k=10$, plotting the objective function \eqref{eq:kmeans_obj} as a function of the iteration number. Visualize (and include in your report) the cluster centers as a $28\times 28$ image.
 
     \item \points{5} For $k=\{2, 4, 8, 16, 32, 64\}$ run the algorithm on the \emph{training} dataset to obtain centers $\{\mu_{i}\}_{i=1}^k$. If $\{(\bx_i,y_i)\}_{i=1}^n$ and $\{(\bx_i',y_i')\}_{i=1}^m$ denote the training and test sets, respectively, plot the training error $\frac{1}{n} \sum_{i=1}^n \min_{j=1,\dots,k} \| \mu_j - \bx_i \|_2^2$ and test error $\frac{1}{m} \sum_{i=1}^m \min_{j=1,\dots,k} \| \mu_j - \bx_i' \|_2^2$ as a function of $k$ on the same plot.
 \end{enumerate}
@@ -199,7 +203,7 @@ Let $\mu \in \mathbb{R}^{d}$ denote the average of the training examples in $X_{
  \subsection*{What to Submit:}
     \begin{itemize}
 
-        \item \textbf{For part (a):} Eigenvalues λ1, λ2, λ10, λ30, and λ50 and the sum. At least 6 leading digits.
+        \item \textbf{For part (a):} Eigenvalues $\lambda1, \lambda2, \lambda10, \lambda30, and \lambda50$ and the sum. At least 6 leading digits.
         \item \textbf{For part (b):} The Formula. If you are defining new variables/matrices make sure their definition is stated
         clearly.
         \item \textbf{For part (c):} Plot containing reconstruction error on train and test sets. Plot of $1-\frac{\sum_{i=1}^{k}{\lambda_i}}{\sum_{i=1}^{d}{\lambda_i}}$
@@ -369,7 +373,7 @@ to you to do this. Each RNN cell (squares above) generates a hidden state $h_i$.
 fully-connected layer, which then produces a single prediction between $0$ and $1$.
 
 \subsubsection*{Setup}
-\begin{enumerate}[1.]
+\begin{enumerate}%[1.]
     \item Update environment by running:
     \begin{lstlisting}[basicstyle=\ttfamily\small]
     conda env update -f environment.yaml
@@ -385,10 +389,10 @@ You only need to modify \texttt{problems.py}, however you are free to also modif
     to a review, and reviews often have different lengths. The issue is that to efficiently train a model with textual data, we need
     to create batches of data that are fixed size matrices. In order to store a batch of sequences in a single
     matrix, we add padding to shorter sequences so that each sequence has the same length. Given a list of $N$ sequences, we:
-    \begin{enumerate}[1.]
+    \begin{enumerate}%1.]
         \item Find the length of the longest sequence in the batch, call it \texttt{max\_sequence\_length}
         \item Append padding tokens to the end of each sequence so that each sequence has length
-        
+
         \texttt{max\_sequence\_length}
         \item Stack the sequences into a matrix of size \texttt{(N, max\_sequence\_length)}
     \end{enumerate}

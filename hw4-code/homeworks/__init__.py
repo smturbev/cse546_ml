@@ -1,3 +1,3 @@
-from . import pca, k_means, autoencoders
+from . import k_means, autoencoders, pca
 
-__all__ = ["pca", "k_means", "autoencoders"]
+__all__ = ["k_means", "autoencoders", "pca"]
